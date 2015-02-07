@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20110701" xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_9tIUoK7JEeSVzoBcY7qgXQ" name="NewModel">
+  <packagedElement xmi:type="uml:Package" xmi:id="_qoSVQK7KEeSVzoBcY7qgXQ" name="dao"/>
+  <packagedElement xmi:type="uml:Package" xmi:id="_yg-v0K7KEeSVzoBcY7qgXQ" name="view"/>
+  <packagedElement xmi:type="uml:Package" xmi:id="_5IczEK7KEeSVzoBcY7qgXQ" name="control"/>
+  <packagedElement xmi:type="uml:Package" xmi:id="_APGssK7LEeSVzoBcY7qgXQ" name="model">
+    <packagedElement xmi:type="uml:Class" xmi:id="_ClWLUK7LEeSVzoBcY7qgXQ" name="Patient">
+      <ownedAttribute xmi:id="_j1nAMK7NEeSVzoBcY7qgXQ" name="id" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/XMLPrimitiveTypes.library.uml#ID"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_s4dZYK7QEeSVzoBcY7qgXQ" name="entry" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/XMLPrimitiveTypes.library.uml#DateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_KZVycK7TEeSVzoBcY7qgXQ" name="movements" visibility="private" type="_SI0gQK7LEeSVzoBcY7qgXQ"/>
+      <ownedAttribute xmi:id="_z0_tsK7QEeSVzoBcY7qgXQ" name="exit" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/XMLPrimitiveTypes.library.uml#DateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Hcq_QK7OEeSVzoBcY7qgXQ" name="currentX" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_PhzTUK7OEeSVzoBcY7qgXQ" name="currentY" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_VIOJQK7OEeSVzoBcY7qgXQ" name="currentZ" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+      </ownedAttribute>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="_E7EFgK7LEeSVzoBcY7qgXQ" name="Department">
+      <ownedAttribute xmi:id="_nmGhMK7LEeSVzoBcY7qgXQ" name="id" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/XMLPrimitiveTypes.library.uml#ID"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_FUn_kK7MEeSVzoBcY7qgXQ" name="xCoordinate" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#double"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_NeBIkK7MEeSVzoBcY7qgXQ" name="yCoordinate" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#double"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_XApVYK7MEeSVzoBcY7qgXQ" name="zCoordniate" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#double"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_bC8GIK7MEeSVzoBcY7qgXQ" name="weightingFactor" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#double"/>
+      </ownedAttribute>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="_OTQj8K7LEeSVzoBcY7qgXQ" name="Clock">
+      <ownedAttribute xmi:id="_YQP_QK7QEeSVzoBcY7qgXQ" name="firstEntry" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/XMLPrimitiveTypes.library.uml#DateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_dnJLcK7QEeSVzoBcY7qgXQ" name="lastExit">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/XMLPrimitiveTypes.library.uml#DateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_iNfEcK7QEeSVzoBcY7qgXQ" name="currentTime" visibility="public">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/XMLPrimitiveTypes.library.uml#DateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="_SI0gQK7LEeSVzoBcY7qgXQ" name="Movement">
+      <ownedAttribute xmi:id="_sJRU8K7MEeSVzoBcY7qgXQ" name="from" visibility="private" type="_E7EFgK7LEeSVzoBcY7qgXQ"/>
+      <ownedAttribute xmi:id="_x8reAK7MEeSVzoBcY7qgXQ" name="to" visibility="private" type="_E7EFgK7LEeSVzoBcY7qgXQ"/>
+      <ownedAttribute xmi:id="_jIPZUK7MEeSVzoBcY7qgXQ" name="entry" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/XMLPrimitiveTypes.library.uml#DateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_CR5Y8K7NEeSVzoBcY7qgXQ" name="type" visibility="private">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/JavaPrimitiveTypes.library.uml#int"/>
+      </ownedAttribute>
+    </packagedElement>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Package" xmi:id="_b7TJIK7aEeSVzoBcY7qgXQ" name="application"/>
+</uml:Model>
