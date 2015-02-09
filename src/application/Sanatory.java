@@ -15,7 +15,6 @@ public class Sanatory {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		new Sanatory();
-		System.out.println("Test");
 	}
 
 }
