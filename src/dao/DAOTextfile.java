@@ -21,14 +21,16 @@ public class DAOTextfile implements DAO {
 	ArrayList<Movement> movements = new ArrayList<Movement>();
 	ArrayList<ArrayList> depMov = new ArrayList<ArrayList>();
 
-	// Standard Constructor
+	// standard constructor
 	public DAOTextfile() {
+
 	}
 
 	public DAOTextfile getUniqueInstance() {
 		if (uniqueInstance == null) {
 			uniqueInstance = new DAOTextfile();
 		}
+
 		return uniqueInstance;
 	}
 
@@ -39,7 +41,6 @@ public class DAOTextfile implements DAO {
 		String cvsSplitBy = "\t";
 
 		try {
-
 			br = new BufferedReader(new FileReader(csvFile));
 			line = br.readLine();
 			while ((line = br.readLine()) != null) {
@@ -59,10 +60,13 @@ public class DAOTextfile implements DAO {
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+
 		} catch (IOException e) {
 			e.printStackTrace();
+
 		} finally {
 			if (br != null) {
+
 				try {
 					br.close();
 				} catch (IOException e) {
@@ -71,11 +75,9 @@ public class DAOTextfile implements DAO {
 			}
 		}
 
-		
 		csvFile = "data/movements.txt";
 
 		try {
-
 			br = new BufferedReader(new FileReader(csvFile));
 			line = br.readLine();
 			while ((line = br.readLine()) != null) {
@@ -89,22 +91,28 @@ public class DAOTextfile implements DAO {
 				try {
 					DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 					entry = df.parse(details[2]);
-				} catch (ParseException e) {// TODO}
+				} catch (ParseException e) {
+					// TODO
 				}
+
 				try {
 					type = Integer.parseInt(details[3]);
 				} catch (NumberFormatException e) {
+
 				}
-				
+
 				Movement movement = new Movement(from, to, entry, type);
 				movements.add(movement);
 			}
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+
 		} catch (IOException e) {
 			e.printStackTrace();
+
 		} finally {
+
 			if (br != null) {
 				try {
 					br.close();
@@ -113,6 +121,7 @@ public class DAOTextfile implements DAO {
 				}
 			}
 		}
+
 		depMov.add(departments);
 		depMov.add(movements);
 		return depMov;
@@ -121,11 +130,13 @@ public class DAOTextfile implements DAO {
 	public Department findDepartment(String details) {
 		Department temp = new Department(0, 0, 0, 0, 0);
 		int ID;
+
 		try {
 			ID = Integer.parseInt(details);
 		} catch (NumberFormatException e) {
 			ID = 0;
 		}
+
 		if (ID != 0) {
 			for (int i = 0; i < departments.size(); i++) {
 				if (departments.get(i).getID() == ID) {
@@ -133,6 +144,7 @@ public class DAOTextfile implements DAO {
 				}
 			}
 		}
+
 		return temp;
 	}
 }

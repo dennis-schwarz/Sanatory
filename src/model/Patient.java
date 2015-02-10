@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class Patient {
-	
 	private int ID;
 	private Date entry;
 	private ArrayList<Movement> movements;
@@ -12,10 +11,8 @@ public class Patient {
 	private double currentX;
 	private double currentY;
 	private double currentZ;
-	
-	
-	public Patient(int iD, Date entry, ArrayList<Movement> movements,
-			Date exit) {
+
+	public Patient(int iD, Date entry, ArrayList<Movement> movements, Date exit) {
 		super();
 		ID = iD;
 		this.entry = entry;
@@ -25,7 +22,5 @@ public class Patient {
 		this.currentY = 0;
 		this.currentZ = 0;
 	}
-	
-	
 
 }

@@ -3,19 +3,20 @@ package model;
 import java.util.Date;
 
 public class Clock {
-
 	private static Clock uniqueInstance;
 	private Date firstEntry;
 	private Date lastExit;
 	private Date currentTime;
-	
+
 	private Clock() {
+
 	}
-	
+
 	public Clock getUniqueInstance() {
-		if (Clock.uniqueInstance == null){
+		if (Clock.uniqueInstance == null) {
 			Clock.uniqueInstance = new Clock();
 		}
+
 		return Clock.uniqueInstance;
 	}
 
@@ -26,4 +27,5 @@ public class Clock {
 	public void setLastExit(Date lastExit) {
 		this.lastExit = lastExit;
 	}
+
 }

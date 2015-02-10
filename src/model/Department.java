@@ -7,8 +7,9 @@ public class Department {
 	private double zCoordinate;
 	private double weightingFactor;
 	private boolean isDepartment;
-	
-	public Department(int ID, double xCoordinate, double yCoordinate, double zCoordinate, double weightingFactor){
+
+	public Department(int ID, double xCoordinate, double yCoordinate,
+			double zCoordinate, double weightingFactor) {
 		this.ID = ID;
 		this.xCoordinate = xCoordinate;
 		this.yCoordinate = yCoordinate;
@@ -19,6 +20,5 @@ public class Department {
 	public int getID() {
 		return ID;
 	}
-	
-	
+
 }
