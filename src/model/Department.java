@@ -21,4 +21,7 @@ public class Department {
 		return ID;
 	}
 
+	public double getWeightingFactor() {
+		return weightingFactor;
+	}
 }
