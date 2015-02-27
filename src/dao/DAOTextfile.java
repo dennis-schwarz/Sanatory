@@ -16,13 +16,12 @@ import model.Department;
 import model.Movement;
 
 public class DAOTextfile implements DAO {
-	
+
 	private static DAOTextfile uniqueInstance = null;
 	ArrayList<Department> departments = new ArrayList<Department>();
 	ArrayList<Movement> movements = new ArrayList<Movement>();
 	ArrayList<ArrayList> depMov = new ArrayList<ArrayList>();
 
-	// standard constructor
 	public DAOTextfile() {
 
 	}
@@ -55,9 +54,7 @@ public class DAOTextfile implements DAO {
 						Double.parseDouble(details[3]),
 						Double.parseDouble(details[4]));
 				departments.add(department);
-				//System.out.println(department.getID() + "\t" + department.getWeightingFactor() + "\n");
 			}
-
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -76,19 +73,19 @@ public class DAOTextfile implements DAO {
 			}
 		}
 
-		csvFile = "data/movements.txt";
+		csvFile = "data/movementsTest.txt";
 		Date entry = null;
-		
+
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 			line = br.readLine();
-			
+
 			while ((line = br.readLine()) != null) {
 				// use comma as separator
 				String[] details = line.split(cvsSplitBy);
 				Department from = findDepartment(details[0]);
 				Department to = findDepartment(details[1]);
-								
+
 				int type = 0;
 				try {
 					DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -105,9 +102,9 @@ public class DAOTextfile implements DAO {
 
 				Movement movement = new Movement(from, to, entry, type);
 				movements.add(movement);
-				//System.out.print("Test " + movement.whereAmI().getID() + "\t" + movement.whereDoIGo().getID() + "\n\n");
+				System.out.print(movement.whereAmI().getID() + "\t"
+						+ movement.whereDoIGo().getID() + "\n");
 			}
-			
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -130,17 +127,15 @@ public class DAOTextfile implements DAO {
 		depMov.add(movements);
 		return depMov;
 	}
-	
+
 	public Department findDepartment(String details) {
 		Department temp = new Department(0, 0, 0, 0, 0);
-		int ID;
+		int ID = 0;
 
 		try {
 			ID = Integer.parseInt(details);
-			//System.out.print(ID);
 		} catch (NumberFormatException e) {
 			ID = 0;
-			//System.out.println("ID = 0");
 		}
 
 		if (ID != 0) {
@@ -153,4 +148,5 @@ public class DAOTextfile implements DAO {
 
 		return temp;
 	}
+
 }
