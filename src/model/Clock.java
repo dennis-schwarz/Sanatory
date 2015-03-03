@@ -2,15 +2,16 @@ package model;
 
 import java.util.Date;
 
+/*
+ * Braucht es die Clock nicht nur bei der Visualisierung, sprich im POVRAY?
+ * Wir habe alle Zeiten im Date-Format hier. Wenn wir bei der Animation eine Clock haben, sollte das doch reichen, oder?
+ */
+@SuppressWarnings("unused")
 public class Clock {
 	private static Clock uniqueInstance;
 	private Date firstEntry;
 	private Date lastExit;
 	private Date currentTime;
-
-	private Clock() {
-
-	}
 
 	public Clock getUniqueInstance() {
 		if (Clock.uniqueInstance == null) {

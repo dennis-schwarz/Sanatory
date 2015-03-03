@@ -4,27 +4,22 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 import model.Department;
 import model.Movement;
 
+@SuppressWarnings("rawtypes")
 public class DAOTextfile implements DAO {
-
 	private static DAOTextfile uniqueInstance = null;
 	ArrayList<Department> departments = new ArrayList<Department>();
 	ArrayList<Movement> movements = new ArrayList<Movement>();
 	ArrayList<ArrayList> depMov = new ArrayList<ArrayList>();
-
-	public DAOTextfile() {
-
-	}
 
 	public DAOTextfile getUniqueInstance() {
 		if (uniqueInstance == null) {
@@ -73,12 +68,13 @@ public class DAOTextfile implements DAO {
 			}
 		}
 
-		csvFile = "data/movementsTest.txt";
+		csvFile = "data/movements.txt";
 		Date entry = null;
 
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 			line = br.readLine();
+			PrintWriter output = new PrintWriter("data/output.txt");
 
 			while ((line = br.readLine()) != null) {
 				// use comma as separator
@@ -91,7 +87,7 @@ public class DAOTextfile implements DAO {
 					DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 					entry = df.parse(details[2]);
 				} catch (ParseException e) {
-					// TODO
+					e.printStackTrace();
 				}
 
 				try {
@@ -102,9 +98,21 @@ public class DAOTextfile implements DAO {
 
 				Movement movement = new Movement(from, to, entry, type);
 				movements.add(movement);
-				System.out.print(movement.whereAmI().getID() + "\t"
-						+ movement.whereDoIGo().getID() + "\n");
+
+				// output (only existing departments)
+				if (!(from.getID() == 666 || to.getID() == 666)) {
+					output.print(movement.whereAmI().getxCoordinate() + "\t"
+							+ movement.whereAmI().getyCoordinate() + "\t"
+							+ movement.whereAmI().getzCoordinate() + "\t"
+							+ movement.whereDoIGo().getxCoordinate() + "\t"
+							+ movement.whereDoIGo().getyCoordinate() + "\t"
+							+ movement.whereDoIGo().getzCoordinate() + "\t"
+							+ movement.whenDoIStart() + "\t"
+							+ movement.howDoIMove() + "\n");
+				}
 			}
+
+			output.close();
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -117,6 +125,7 @@ public class DAOTextfile implements DAO {
 			if (br != null) {
 				try {
 					br.close();
+
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -131,6 +140,7 @@ public class DAOTextfile implements DAO {
 	public Department findDepartment(String details) {
 		Department temp = new Department(0, 0, 0, 0, 0);
 		int ID = 0;
+		boolean departmentExist = false;
 
 		try {
 			ID = Integer.parseInt(details);
@@ -140,9 +150,16 @@ public class DAOTextfile implements DAO {
 
 		if (ID != 0) {
 			for (int i = 0; i < departments.size(); i++) {
+
 				if (departments.get(i).getID() == ID) {
 					temp = departments.get(i);
+					departmentExist = true;
 				}
+			}
+
+			// department does not exist (evil department with ID 666)
+			if (departmentExist == false) {
+				temp = new Department(666, 0, 0, 0, 0);
 			}
 		}
 

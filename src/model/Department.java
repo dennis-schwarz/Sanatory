@@ -6,7 +6,6 @@ public class Department {
 	private double yCoordinate;
 	private double zCoordinate;
 	private double weightingFactor;
-	private boolean isDepartment;
 
 	public Department(int ID, double xCoordinate, double yCoordinate,
 			double zCoordinate, double weightingFactor) {
@@ -21,7 +20,20 @@ public class Department {
 		return ID;
 	}
 
+	public double getxCoordinate() {
+		return xCoordinate;
+	}
+
+	public double getyCoordinate() {
+		return yCoordinate;
+	}
+
+	public double getzCoordinate() {
+		return zCoordinate;
+	}
+
 	public double getWeightingFactor() {
 		return weightingFactor;
 	}
+
 }

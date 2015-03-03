@@ -1,5 +1,6 @@
 package application;
 
+@SuppressWarnings("unused")
 public class ApplicationContext {
 	private String version;
 

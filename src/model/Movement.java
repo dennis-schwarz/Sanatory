@@ -14,13 +14,21 @@ public class Movement {
 		this.entry = entry;
 		this.type = type;
 	}
-	
+
 	public Department whereAmI() {
 		return from;
 	}
-	
+
 	public Department whereDoIGo() {
 		return to;
+	}
+
+	public Date whenDoIStart() {
+		return entry;
+	}
+
+	public int howDoIMove() {
+		return type;
 	}
 
 }
