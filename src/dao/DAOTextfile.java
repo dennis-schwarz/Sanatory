@@ -68,13 +68,25 @@ public class DAOTextfile implements DAO {
 			}
 		}
 
-		csvFile = "data/movements.txt";
+		csvFile = "data/movementsTest.txt"; // Testdaten
 		Date entry = null;
 
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 			line = br.readLine();
-			PrintWriter output = new PrintWriter("data/output.txt");
+			PrintWriter output = new PrintWriter("data/usbPatients_scene.pov"); // POVRay-Datei
+			/*
+			 * Output-Test for POVRay
+			 */
+			output.print("//=========================\n//Four makros for smooth start and stop\n"
+					+ "#macro Cos_01(X)\n\t(0.5 - 0.5 * cos(pi * X))\n#end\n//————————————-------------\n"
+					+ "#macro Cos_02(X)\n\t(0.5 - 0.5 * cos(2 * pi * X))\n#end\n//————————————-------------\n"
+					+ "#macro Cos_03(X)\n\t(1 - (0.5 - 0.5 * cos(pi * X)))\n#end\n//————————————-------------\n"
+					+ "#macro Cos_01(X)\n\t(1 - (0.5 - 0.5 * cos(2 * pi * X)))\n#end\n//————————————-------------\n"
+					+ "\n//=========================\n//The moving spheres (patients)\nunion {\n\n");
+			/*
+			 * End of output-Test for POVRay
+			 */
 
 			while ((line = br.readLine()) != null) {
 				// use comma as separator
@@ -101,17 +113,52 @@ public class DAOTextfile implements DAO {
 
 				// output (only existing departments)
 				if (!(from.getID() == 666 || to.getID() == 666)) {
-					output.print(movement.whereAmI().getxCoordinate() + "\t"
-							+ movement.whereAmI().getyCoordinate() + "\t"
-							+ movement.whereAmI().getzCoordinate() + "\t"
-							+ movement.whereDoIGo().getxCoordinate() + "\t"
-							+ movement.whereDoIGo().getyCoordinate() + "\t"
-							+ movement.whereDoIGo().getzCoordinate() + "\t"
-							+ movement.whenDoIStart() + "\t"
-							+ movement.howDoIMove() + "\n");
+					/*
+					 * Consoel-output
+					 */
+					// System.out.print(movement.whereAmI().getxCoordinate()
+					// + "\t" + movement.whereAmI().getyCoordinate()
+					// + "\t" + movement.whereAmI().getzCoordinate()
+					// + "\t" + movement.whereDoIGo().getxCoordinate()
+					// + "\t" + movement.whereDoIGo().getyCoordinate()
+					// + "\t" + movement.whereDoIGo().getzCoordinate()
+					// + "\t" + movement.whenDoIStart() + "\t"
+					// + movement.howDoIMove() + "\n");
+
+					/*
+					 * Output-Test for POVRay
+					 */
+					output.print("\t//Sphere {\n\t\t<"
+							+ movement.whereAmI().getxCoordinate()
+							+ ", "
+							+ movement.whereAmI().getyCoordinate()
+							+ ", "
+							+ movement.whereAmI().getzCoordinate()
+							+ ">, 5\n\n"
+							+ "\t\ttexture {\n\t\t\tpigment {\n\t\t\t\trgb <1, 0, 0>\n\t\t\t}\n\n\t\t\tfinish"
+							+ "{\n\t\t\t\tdiffuse 0.9\n\t\t\t\tphong 1\n\t\t\t}\n\t\t}//End of texture\n\n"
+							+ "\t\t//translate <"
+							+ movement.whereAmI().getxCoordinate()
+							+ ", "
+							+ movement.whereAmI().getyCoordinate()
+							+ ", "
+							+ movement.whereAmI().getzCoordinate()
+							+ ">"
+							+ "\n\t\t//translate <"
+							+ movement.whereAmI().getxCoordinate()
+							+ " * Cos_01(clock), "
+							+ movement.whereAmI().getyCoordinate()
+							+ " * Cos_01(clock), "
+							+ movement.whereAmI().getzCoordinate()
+							+ " * Cos_01(clock)>\n\t}"
+							+ "//End of sphere\n\t//-------------------------\n\n");
+					/*
+					 * End of output-Test for POVRay
+					 */
 				}
 			}
 
+			output.print("}\n//End of union\n//========================="); // POVRay-Datei
 			output.close();
 
 		} catch (FileNotFoundException e) {
