@@ -68,13 +68,13 @@ public class DAOTextfile implements DAO {
 			}
 		}
 
-		csvFile = "data/movementsTest.txt"; // Testdaten
+		csvFile = "data/movements.txt";
 		Date entry = null;
 
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 			line = br.readLine();
-			PrintWriter output = new PrintWriter("data/usbPatients_scene.pov"); // POVRay-Datei
+			PrintWriter output = new PrintWriter("data/usb.pov"); // POVRay-Datei
 			/*
 			 * Output-Test for POVRay
 			 */
@@ -115,16 +115,17 @@ public class DAOTextfile implements DAO {
 				if (!(from.getID() == 666 || to.getID() == 666)) {
 					/*
 					 * Consoel-output
+					 */ 
+					 /* System.out.print(movement.whereAmI().getxCoordinate() +
+					 * "\t" + movement.whereAmI().getyCoordinate() + "\t" +
+					 * movement.whereAmI().getzCoordinate() + "\t" +
+					 * movement.whereDoIGo().getxCoordinate() + "\t" +
+					 * movement.whereDoIGo().getyCoordinate() + "\t" +
+					 * movement.whereDoIGo().getzCoordinate() + "\t" +
+					 * movement.whenDoIStart() + "\t" + movement.howDoIMove() +
+					 * "\n" + searchFirstDate(movements) );
 					 */
-					// System.out.print(movement.whereAmI().getxCoordinate()
-					// + "\t" + movement.whereAmI().getyCoordinate()
-					// + "\t" + movement.whereAmI().getzCoordinate()
-					// + "\t" + movement.whereDoIGo().getxCoordinate()
-					// + "\t" + movement.whereDoIGo().getyCoordinate()
-					// + "\t" + movement.whereDoIGo().getzCoordinate()
-					// + "\t" + movement.whenDoIStart() + "\t"
-					// + movement.howDoIMove() + "\n");
-
+					
 					/*
 					 * Output-Test for POVRay
 					 */
@@ -157,6 +158,10 @@ public class DAOTextfile implements DAO {
 					 */
 				}
 			}
+			
+			// print out first and last date of list
+			System.out.println(searchFirstDate(movements));
+			System.out.println(searchLastDate(movements));
 
 			output.print("}\n//End of union\n//========================="); // POVRay-Datei
 			output.close();
@@ -211,6 +216,46 @@ public class DAOTextfile implements DAO {
 		}
 
 		return temp;
+	}
+
+	// first Date
+	public Date searchFirstDate(ArrayList movements) {
+		Date firstDate = null;
+		Movement movement;
+
+		for (int i = 0; i < movements.size(); i++) {
+			movement = (Movement) movements.get(i);
+			
+			if (i == 0) {
+				firstDate = movement.whenDoIStart();
+			}
+
+			if (firstDate.after(movement.whenDoIStart())) {
+				firstDate = movement.whenDoIStart();
+			}
+		}
+
+		return firstDate;
+	}
+
+	// last Date
+	public Date searchLastDate(ArrayList movements) {
+		Date lastDate = null;
+		Movement movement;
+
+		for (int i = 0; i < movements.size(); i++) {
+			movement = (Movement) movements.get(i);
+			
+			if (i == 0) {
+				lastDate = movement.whenDoIStart();
+			}
+
+			if (lastDate.before(movement.whenDoIStart())) {
+				lastDate = movement.whenDoIStart();
+			}
+		}
+
+		return lastDate;
 	}
 
 }
