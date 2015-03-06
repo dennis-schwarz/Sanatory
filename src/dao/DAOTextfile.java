@@ -20,7 +20,8 @@ public class DAOTextfile implements DAO {
 	ArrayList<Department> departments = new ArrayList<Department>();
 	ArrayList<Movement> movements = new ArrayList<Movement>();
 	ArrayList<ArrayList> depMov = new ArrayList<ArrayList>();
-
+	int counter = 0;
+	
 	public DAOTextfile getUniqueInstance() {
 		if (uniqueInstance == null) {
 			uniqueInstance = new DAOTextfile();
@@ -68,7 +69,7 @@ public class DAOTextfile implements DAO {
 			}
 		}
 
-		csvFile = "data/movements.txt";
+		csvFile = "data/movementsTest.txt";
 		Date entry = null;
 
 		try {
@@ -77,18 +78,43 @@ public class DAOTextfile implements DAO {
 			PrintWriter output = new PrintWriter("data/usb.pov"); // POVRay-Datei
 			/*
 			 * Output-Test for POVRay
-			 */
-			output.print("//=========================\n//Four makros for smooth start and stop\n"
-					+ "#macro Cos_01(X)\n\t(0.5 - 0.5 * cos(pi * X))\n#end\n//————————————-------------\n"
-					+ "#macro Cos_02(X)\n\t(0.5 - 0.5 * cos(2 * pi * X))\n#end\n//————————————-------------\n"
-					+ "#macro Cos_03(X)\n\t(1 - (0.5 - 0.5 * cos(pi * X)))\n#end\n//————————————-------------\n"
-					+ "#macro Cos_01(X)\n\t(1 - (0.5 - 0.5 * cos(2 * pi * X)))\n#end\n//————————————-------------\n"
-					+ "\n//=========================\n//The moving spheres (patients)\nunion {\n\n");
-			/*
-			 * End of output-Test for POVRay
-			 */
 
+			output.print("//------------------------------------------------------------------------\n"
+			 + "// POV-Ray 3.7 Scene File \"patients.pov\"\n// created by Manuel Huerbin, Dennis Schwarz and "
+			 + "Miriam Scholer, FHNW, 2015\n\n"
+			 + "//------------------------------------------------------------------------\n"
+			 + "// general settings ------------------------------------------------------\n"
+			 + "#version 3.7;\nglobal_settings {\n\tassumed_gamma 1.0\n}\n" 
+			 + "#include \"colors.inc\"\n#include \"textures.inc\"\n#include \"math.inc\"\n#include "
+			 + "\"transforms.inc\"\n#include \"usb.pov\" //usb-model (transparent)\n"
+			 + "\n//------------------------------------------------------------------------\n"
+			 + "// camera ----------------------------------------------------------------\n"
+			 + "#declare Camera =\ncamera {\n\tperspective\n\tup <0, 1, 0>\n\tright -x * image_width / image_height"
+			 + "\n\tlocation <0, 0, 1092.539>\n\tlook_at <0, 0, 1091.539>\n\tangle 22.34049 //horizontal FOV angle"
+			 + "\n\trotate <0, 0, -33.51162> //roll\n\trotate <44.54607, 0, 0> //pitch"
+			 + "\n\trotate <0, -44.05138, 0> //yaw\n\ttranslate <201.5, 233.35, 32.205>\n}\n"
+			 + "camera {\n\tCamera\n}\n\n"
+			 + "//------------------------------------------------------------------------\n"
+			 + "// background ------------------------------------------------------------\n"
+			 + "background {\n\tcolor srgb <1, 1, 1>\n}\n\n"
+			 + "//------------------------------------------------------------------------\n"
+			 + "// sun -------------------------------------------------------------------\n"
+			 + "light_source {\n\t<-1000, 2500, -2500>\n\tcolor <1, 1, 1>\n}\n\n"
+			 + "//------------------------------------------------------------------------\n"
+			 + "// sky -------------------------------------------------------------------\n"
+			 + "sky_sphere {\n\tpigment {\n\t\tgradient <0, 0, 0>\n\t\tcolor_map {\n\t\t\t"
+			 + "[0 color rgb <1, 1, 1>]\n\t\t\t[1 color rgb <1, 2, 3>]\n\t\t}\n\t\tscale 2\n\t}\n}\n\n"
+			 + "/------------------------------------------------------------------------\n"
+			 + "// patient ---------------------------------------------------------------\n"
+			 + "#declare Patient =\nsphere {\n\t<1, 1, 1>, 3\n\ttexture {\n\t\tpigment {\n\t\t\t"
+			 + "color rgb <0, 1, 0>\n\t\t}\n\t\tfinish {\n\t\t\tambient 0.1\n\t\t\tdiffuse 0.85\n\t\t\t"
+			 + "phong 1\n\t\t}\n\t}\n}\n\n"
+			 + "//------------------------------------------------------------------------\n"
+			 + "// splines ---------------------------------------------------------------\n");
+			*/
 			while ((line = br.readLine()) != null) {
+				counter++;
+				
 				// use comma as separator
 				String[] details = line.split(cvsSplitBy);
 				Department from = findDepartment(details[0]);
@@ -110,11 +136,44 @@ public class DAOTextfile implements DAO {
 
 				Movement movement = new Movement(from, to, entry, type);
 				movements.add(movement);
-
+				
+				/*
+				output.print("#declare Spline" + counter + " =\n");
+		
+				spline {
+					natural_spline
+					-0.20, <0, 0, 0>, //controll point
+					0.00, <74, 230, 16.25>, //start
+					0.10, <18.5, 310, 20.3>,
+					0.20, <171, 175, 24.1>,
+					0.30, <312, 140.5, 19.2>,
+					0.40, <325, 147, 22.1>,
+					0.50, <140, 175, 12.2>,
+					0.60, <314, 124, 22.1>,
+					0.70, <140, 175, 12.2>,
+					0.80, <325, 147, 22.1>,
+					0.90, <312, 140.5, 19.2>,
+					1.00, <171, 175, 24.1>, //end
+					1.20, <314, 124, 22.1> //controll point
+				}
+					
+				//------------------------------------------------------------------------     
+				// loop ------------------------------------------------------------------ 
+				#declare Start = 0; //start
+				#declare End = 1; //end
+				#while (Start < End)         
+					object {
+						Patient
+						translate Spline(mod((clock + Start / End), 5))     
+					} 
+					#declare Start = Start + 1; //steps
+				#end
+				*/
+				
 				// output (only existing departments)
 				if (!(from.getID() == 666 || to.getID() == 666)) {
 					/*
-					 * Consoel-output
+					 * Console-output
 					 */ 
 					 /* System.out.print(movement.whereAmI().getxCoordinate() +
 					 * "\t" + movement.whereAmI().getyCoordinate() + "\t" +
@@ -125,45 +184,12 @@ public class DAOTextfile implements DAO {
 					 * movement.whenDoIStart() + "\t" + movement.howDoIMove() +
 					 * "\n" + searchFirstDate(movements) );
 					 */
-					
-					/*
-					 * Output-Test for POVRay
-					 */
-					output.print("\t//Sphere {\n\t\t<"
-							+ movement.whereAmI().getxCoordinate()
-							+ ", "
-							+ movement.whereAmI().getyCoordinate()
-							+ ", "
-							+ movement.whereAmI().getzCoordinate()
-							+ ">, 5\n\n"
-							+ "\t\ttexture {\n\t\t\tpigment {\n\t\t\t\trgb <1, 0, 0>\n\t\t\t}\n\n\t\t\tfinish"
-							+ "{\n\t\t\t\tdiffuse 0.9\n\t\t\t\tphong 1\n\t\t\t}\n\t\t}//End of texture\n\n"
-							+ "\t\t//translate <"
-							+ movement.whereAmI().getxCoordinate()
-							+ ", "
-							+ movement.whereAmI().getyCoordinate()
-							+ ", "
-							+ movement.whereAmI().getzCoordinate()
-							+ ">"
-							+ "\n\t\t//translate <"
-							+ movement.whereAmI().getxCoordinate()
-							+ " * Cos_01(clock), "
-							+ movement.whereAmI().getyCoordinate()
-							+ " * Cos_01(clock), "
-							+ movement.whereAmI().getzCoordinate()
-							+ " * Cos_01(clock)>\n\t}"
-							+ "//End of sphere\n\t//-------------------------\n\n");
-					/*
-					 * End of output-Test for POVRay
-					 */
 				}
 			}
 			
 			// print out first and last date of list
 			System.out.println(searchFirstDate(movements));
 			System.out.println(searchLastDate(movements));
-
-			output.print("}\n//End of union\n//========================="); // POVRay-Datei
 			output.close();
 
 		} catch (FileNotFoundException e) {
