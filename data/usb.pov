@@ -59,7 +59,7 @@ sky_sphere {
 	}
 }
 
-/------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // patient --------------------------------------------------------------
 #declare Patient =
 sphere {
@@ -90,7 +90,7 @@ spline {
 }
 #declare Spline2 =
 spline {
-	natural spline
+	natural_spline
 	Zeit, <92.0, 183.0, 16.25>,
 	Zeit, <107.0, 271.0, 16.25>,
 	Zeit, <125.0, 186.0, 16.25>,
@@ -101,7 +101,7 @@ spline {
 }
 #declare Spline3 =
 spline {
-	natural spline
+	natural_spline
 	Zeit, <92.0, 183.0, 16.25>,
 	Zeit, <92.0, 183.0, 16.25>,
 	Zeit, <92.0, 183.0, 16.25>,
@@ -111,7 +111,58 @@ spline {
 }
 #declare Spline4 =
 spline {
-	natural spline
+	natural_spline
+	Zeit, <313.0, 193.0, 24.1>,
+	Zeit, <140.0, 175.0, 12.2>,
+	Zeit, <313.0, 193.0, 24.1>,
+	Zeit, <279.0, 193.0, 24.1>,
+	Zeit, <0.0, 0.0, 0.0>,
+}
+#declare Spline5 =
+spline {
+	natural_spline
+	Zeit, <316.0, 193.0, 20.3>,
+	Zeit, <140.0, 175.0, 12.2>,
+	Zeit, <316.0, 193.0, 20.3>,
+	Zeit, <0.0, 0.0, 0.0>,
+}
+#declare Spline6 =
+spline {
+	natural_spline
+	Zeit, <313.0, 193.0, 24.1>,
+	Zeit, <279.0, 193.0, 24.1>,
+	Zeit, <0.0, 0.0, 0.0>,
+}
+#declare Spline7 =
+spline {
+	natural_spline
+	Zeit, <206.0, 193.0, 31.7>,
+	Zeit, <125.0, 186.0, 16.25>,
+	Zeit, <206.0, 193.0, 31.7>,
+	Zeit, <206.0, 193.0, 31.7>,
+	Zeit, <76.0, 252.0, 20.3>,
+	Zeit, <206.0, 193.0, 31.7>,
+	Zeit, <206.0, 193.0, 31.7>,
+	Zeit, <206.0, 193.0, 31.7>,
+	Zeit, <140.0, 175.0, 12.2>,
+	Zeit, <206.0, 193.0, 31.7>,
+	Zeit, <140.0, 175.0, 20.3>,
+	Zeit, <125.0, 186.0, 16.25>,
+	Zeit, <140.0, 175.0, 20.3>,
+	Zeit, <140.0, 175.0, 20.3>,
+	Zeit, <125.0, 186.0, 16.25>,
+	Zeit, <140.0, 175.0, 20.3>,
+	Zeit, <206.0, 193.0, 31.7>,
+	Zeit, <125.0, 186.0, 16.25>,
+	Zeit, <206.0, 193.0, 31.7>,
+	Zeit, <125.0, 186.0, 16.25>,
+	Zeit, <206.0, 193.0, 31.7>,
+	Zeit, <76.0, 252.0, 20.3>,
+	Zeit, <206.0, 193.0, 31.7>,
+	Zeit, <206.0, 193.0, 31.7>,
+	Zeit, <125.0, 186.0, 16.25>,
+	Zeit, <206.0, 193.0, 31.7>,
+	Zeit, <0.0, 0.0, 0.0>,
 }
 
 //------------------------------------------------------------------------
@@ -130,6 +181,22 @@ spline {
 	object {
 		Patient
 		translate Spline3(mod((clock + Start / End), 5))
+	}
+	object {
+		Patient
+		translate Spline4(mod((clock + Start / End), 5))
+	}
+	object {
+		Patient
+		translate Spline5(mod((clock + Start / End), 5))
+	}
+	object {
+		Patient
+		translate Spline6(mod((clock + Start / End), 5))
+	}
+	object {
+		Patient
+		translate Spline7(mod((clock + Start / End), 5))
 	}
 	#declare Start = Start + 1; //steps
 #end

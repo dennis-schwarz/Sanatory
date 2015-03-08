@@ -20,8 +20,9 @@ public class DAOTextfile implements DAO {
 	ArrayList<Department> departments = new ArrayList<Department>();
 	ArrayList<Movement> movements = new ArrayList<Movement>();
 	ArrayList<ArrayList> depMov = new ArrayList<ArrayList>();
-	int counter = 2;
-	boolean lastPatient = false;
+	int splineCounter = 2;
+	int lineCounterBeginning = 0;
+	int lineCounterCheck = 0;
 
 	public DAOTextfile getUniqueInstance() {
 		if (uniqueInstance == null) {
@@ -31,6 +32,7 @@ public class DAOTextfile implements DAO {
 		return uniqueInstance;
 	}
 
+	@SuppressWarnings("resource")
 	public ArrayList<ArrayList> getAllData() {
 		String csvFile = "data/departments.txt";
 		BufferedReader br = null;
@@ -70,17 +72,19 @@ public class DAOTextfile implements DAO {
 			}
 		}
 
-		csvFile = "data/movementsTest.txt";
+		csvFile = "data/movementsTest.txt";	
 		Date entry = null;
-
+		
 		try {
+			br = new BufferedReader(new FileReader(csvFile));
+				
+			while ((line = br.readLine()) != null) { 
+				lineCounterBeginning++;
+			}
+			
 			br = new BufferedReader(new FileReader(csvFile));
 			line = br.readLine();
 			PrintWriter output = new PrintWriter("data/usb.pov");
-
-			if (line == null) {
-				lastPatient = true;
-			}
 
 			output.print("//------------------------------------------------------------------------\n"
 					+ "// POV-Ray 3.7 Scene File \"patients.pov\"\n// created by Manuel Huerbin, Dennis Schwarz and "
@@ -107,7 +111,7 @@ public class DAOTextfile implements DAO {
 					+ "// sky -------------------------------------------------------------------\n"
 					+ "sky_sphere {\n\tpigment {\n\t\tgradient <0, 0, 0>\n\t\tcolor_map {\n\t\t\t"
 					+ "[0 color rgb <1, 1, 1>]\n\t\t\t[1 color rgb <1, 2, 3>]\n\t\t}\n\t\tscale 2\n\t}\n}\n\n"
-					+ "/------------------------------------------------------------------------\n"
+					+ "//-----------------------------------------------------------------------\n"
 					+ "// patient --------------------------------------------------------------\n"
 					+ "#declare Patient =\nsphere {\n\t<1, 1, 1>, 3\n\ttexture {\n\t\tpigment {\n\t\t\t"
 					+ "color rgb <0, 1, 0>\n\t\t}\n\t\tfinish {\n\t\t\tambient 0.1\n\t\t\tdiffuse 0.85\n\t\t\t"
@@ -117,6 +121,7 @@ public class DAOTextfile implements DAO {
 					+ "#declare Spline1 =\nspline {\n\tnatural spline\n");
 
 			while ((line = br.readLine()) != null) {
+				lineCounterCheck++;
 				// use comma as separator
 				String[] details = line.split(cvsSplitBy);
 				Department from = findDepartment(details[0]);
@@ -147,20 +152,20 @@ public class DAOTextfile implements DAO {
 							+ ", " + movement.whereDoIGo().getzCoordinate()
 							+ ">,\n");
 
-					// separates "patients" (by "exit")
-					if (to.getID() == 0) {
-						output.print("}\n#declare Spline" + counter
-								+ " =\nspline {\n\tnatural spline\n");
-						counter++;
+					// separates "patients" (by "exit") and checks the last patient
+					if (to.getID() == 0 && lineCounterCheck < lineCounterBeginning - 1) {
+						output.print("}\n#declare Spline" + splineCounter
+								+ " =\nspline {\n\tnatural_spline\n");
+						splineCounter++;
 					}
 				}
 			}
-
+			
 			output.print("}\n\n//------------------------------------------------------------------------"
 					+ "\n// loop ------------------------------------------------------------------"
 					+ "\n#declare Start = 0; //start\n#declare End = 1; //end\n#while (Start < End)\n");
 
-			for (int i = 1; i < counter - 1; i++) {
+			for (int i = 1; i < splineCounter; i++) {
 				output.print("\tobject {\n\t\tPatient\n\t\ttranslate Spline"
 						+ i + "(mod((clock + Start / End), 5))" + "\n\t}\n");
 			}
