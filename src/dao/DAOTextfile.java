@@ -39,21 +39,19 @@ public class DAOTextfile implements DAO {
 	@SuppressWarnings("resource")
 	public ArrayList<ArrayList> getAllData() {
 		String csvFileDepartments = "data/departments.txt"; // departments einlesen
-		String csvFileMovements = "data/movementsTest.txt";
-		String csvFilePOV = "data/movementsTest.txt";
+		String csvFileMovements = "data/movements.txt";
+		String csvFilePOV = "data/movements.txt";
 		BufferedReader brDepartments = null;
 		BufferedReader brMovements = null;
 		BufferedReader brPOV = null;
-		
-		String line = "";
 		String cvsSplitBy = "\t";
 
 		try {
 			brDepartments = new BufferedReader(new FileReader(csvFileDepartments));
-			line = brDepartments.readLine();
-			while ((line = brDepartments.readLine()) != null) {
+			String lineDepartments = brDepartments.readLine();
+			while ((lineDepartments = brDepartments.readLine()) != null) {
 				// use comma as separator
-				String[] details = line.split(cvsSplitBy);
+				String[] details = lineDepartments.split(cvsSplitBy);
 				Department department = new Department(
 						Integer.parseInt(details[0]),
 						Double.parseDouble(details[1]),
@@ -91,12 +89,12 @@ public class DAOTextfile implements DAO {
 			// und das erste und letzte Datum zu bestimmen (fuer Einteilung fuer
 			// POVRay)
 			brMovements = new BufferedReader(new FileReader(csvFileMovements));
-			line = brMovements.readLine();
+			String lineMovements = brMovements.readLine();
 			int type = 0;
 
-			while ((line = brMovements.readLine()) != null) {
+			while ((lineMovements = brMovements.readLine()) != null) {
 				lineCounterBeginning++;
-				String[] searchDates = line.split(cvsSplitBy);
+				String[] searchDates = lineMovements.split(cvsSplitBy);
 				Department from = findDepartment(searchDates[0]);
 				Department to = findDepartment(searchDates[1]);
 				
@@ -122,7 +120,8 @@ public class DAOTextfile implements DAO {
 			lastDate = searchLastDate(movements);
 			long duration = lastDate.getTime() - firstDate.getTime();
 			long diffInHours = TimeUnit.MILLISECONDS.toHours(duration);
-	
+			System.out.println(diffInHours);
+			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 
@@ -145,7 +144,7 @@ public class DAOTextfile implements DAO {
 		// movements.txt ein zweitesMal lesen und POVRay-File generieren
 		try {
 			brPOV = new BufferedReader(new FileReader(csvFilePOV));
-			line = brPOV.readLine();
+			String linePOV = brPOV.readLine();
 			PrintWriter output = new PrintWriter("data/usb.pov");
 
 			output.print("//------------------------------------------------------------------------\n"
@@ -182,10 +181,10 @@ public class DAOTextfile implements DAO {
 					+ "// splines ---------------------------------------------------------------\n"
 					+ "#declare Spline1 =\nspline {\n\tnatural spline\n");
 
-			while ((line = brPOV.readLine()) != null) {
+			while ((linePOV = brPOV.readLine()) != null) {
 				lineCounterCheck++;
 				// use comma as separator
-				String[] details = line.split(cvsSplitBy);
+				String[] details = linePOV.split(cvsSplitBy);
 				Department from = findDepartment(details[0]);
 				Department to = findDepartment(details[1]);
 

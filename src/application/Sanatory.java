@@ -16,7 +16,6 @@ public class Sanatory {
 
 	public static void main(String[] args) {
 		new Sanatory();
-		//System.out.println("Output-File generiert.");
 	}
 
 }
