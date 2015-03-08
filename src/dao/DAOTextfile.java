@@ -20,7 +20,7 @@ public class DAOTextfile implements DAO {
 	// declaration and initialization
 	private static DAOTextfile uniqueInstance = null;
 	ArrayList<Department> departments = new ArrayList<Department>();
-	ArrayList<Movement> searchFirstDate = new ArrayList<Movement>(); // vielleicht aendern in ArrayList<Date>
+	ArrayList<Movement> movementsAdmin = new ArrayList<Movement>(); // to find number of lines and first and last date
 	ArrayList<Movement> movements = new ArrayList<Movement>();
 	ArrayList<ArrayList> depMov = new ArrayList<ArrayList>();
 	int splineCounter = 2;
@@ -36,11 +36,11 @@ public class DAOTextfile implements DAO {
 	}
 
 	// Datenverarbeitung Departments
-	@SuppressWarnings("resource")
+	@SuppressWarnings({ "resource", "unused" })
 	public ArrayList<ArrayList> getAllData() {
 		String csvFileDepartments = "data/departments.txt"; // departments einlesen
-		String csvFileMovements = "data/test";
-		String csvFilePOV = "data/test";
+		String csvFileMovements = "data/movements.txt";
+		String csvFilePOV = "data/movements.txt";
 		BufferedReader brDepartments = null;
 		BufferedReader brMovements = null;
 		BufferedReader brPOV = null;
@@ -113,14 +113,11 @@ public class DAOTextfile implements DAO {
 
 				Movement movementCurrent = new Movement(from, to, entry, type);
 				movements.add(movementCurrent);
-				searchFirstDate.add(movementCurrent);
+				movementsAdmin.add(movementCurrent);
 			}
 			
 			firstDate = searchFirstDate(movements);
 			lastDate = searchLastDate(movements);
-			long duration = lastDate.getTime() - firstDate.getTime();
-			long diffInHours = TimeUnit.MILLISECONDS.toHours(duration);
-			System.out.println(diffInHours);
 			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -179,7 +176,7 @@ public class DAOTextfile implements DAO {
 					+ "phong 1\n\t\t}\n\t}\n}\n\n"
 					+ "//------------------------------------------------------------------------\n"
 					+ "// splines ---------------------------------------------------------------\n"
-					+ "#declare Spline1 =\nspline {\n\tnatural spline\n");
+					+ "#declare Spline1 =\nspline {\n\tnatural_spline\n");
 
 			while ((linePOV = brPOV.readLine()) != null) {
 				lineCounterCheck++;
@@ -208,9 +205,10 @@ public class DAOTextfile implements DAO {
 				// output (only existing departments)
 				if (!(from.getID() == 666 || to.getID() == 666)) {
 					Date currentDate = movement.whenDoIStart();
-					
-					output.print((currentDate.getTime() - firstDate.getTime() / 1000.00) // calculate time
-							+ movement.whereDoIGo().getxCoordinate() + ", "
+					long diff = currentDate.getTime() - firstDate.getTime();
+					long diffInHours = TimeUnit.MILLISECONDS.toHours(diff);
+							
+					output.print(diffInHours / 1000.00 + ", <" + movement.whereDoIGo().getxCoordinate() + ", "
 							+ movement.whereDoIGo().getyCoordinate() + ", "
 							+ movement.whereDoIGo().getzCoordinate() + ">,\n");
 
