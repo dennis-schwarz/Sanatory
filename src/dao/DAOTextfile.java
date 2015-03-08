@@ -20,8 +20,9 @@ public class DAOTextfile implements DAO {
 	ArrayList<Department> departments = new ArrayList<Department>();
 	ArrayList<Movement> movements = new ArrayList<Movement>();
 	ArrayList<ArrayList> depMov = new ArrayList<ArrayList>();
-	int counter = 0;
-	
+	int counter = 2;
+	boolean lastPatient = false;
+
 	public DAOTextfile getUniqueInstance() {
 		if (uniqueInstance == null) {
 			uniqueInstance = new DAOTextfile();
@@ -75,46 +76,47 @@ public class DAOTextfile implements DAO {
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 			line = br.readLine();
-			PrintWriter output = new PrintWriter("data/usb.pov"); // POVRay-Datei
-			/*
-			 * Output-Test for POVRay
+			PrintWriter output = new PrintWriter("data/usb.pov");
+
+			if (line == null) {
+				lastPatient = true;
+			}
 
 			output.print("//------------------------------------------------------------------------\n"
-			 + "// POV-Ray 3.7 Scene File \"patients.pov\"\n// created by Manuel Huerbin, Dennis Schwarz and "
-			 + "Miriam Scholer, FHNW, 2015\n\n"
-			 + "//------------------------------------------------------------------------\n"
-			 + "// general settings ------------------------------------------------------\n"
-			 + "#version 3.7;\nglobal_settings {\n\tassumed_gamma 1.0\n}\n" 
-			 + "#include \"colors.inc\"\n#include \"textures.inc\"\n#include \"math.inc\"\n#include "
-			 + "\"transforms.inc\"\n#include \"usb.pov\" //usb-model (transparent)\n"
-			 + "\n//------------------------------------------------------------------------\n"
-			 + "// camera ----------------------------------------------------------------\n"
-			 + "#declare Camera =\ncamera {\n\tperspective\n\tup <0, 1, 0>\n\tright -x * image_width / image_height"
-			 + "\n\tlocation <0, 0, 1092.539>\n\tlook_at <0, 0, 1091.539>\n\tangle 22.34049 //horizontal FOV angle"
-			 + "\n\trotate <0, 0, -33.51162> //roll\n\trotate <44.54607, 0, 0> //pitch"
-			 + "\n\trotate <0, -44.05138, 0> //yaw\n\ttranslate <201.5, 233.35, 32.205>\n}\n"
-			 + "camera {\n\tCamera\n}\n\n"
-			 + "//------------------------------------------------------------------------\n"
-			 + "// background ------------------------------------------------------------\n"
-			 + "background {\n\tcolor srgb <1, 1, 1>\n}\n\n"
-			 + "//------------------------------------------------------------------------\n"
-			 + "// sun -------------------------------------------------------------------\n"
-			 + "light_source {\n\t<-1000, 2500, -2500>\n\tcolor <1, 1, 1>\n}\n\n"
-			 + "//------------------------------------------------------------------------\n"
-			 + "// sky -------------------------------------------------------------------\n"
-			 + "sky_sphere {\n\tpigment {\n\t\tgradient <0, 0, 0>\n\t\tcolor_map {\n\t\t\t"
-			 + "[0 color rgb <1, 1, 1>]\n\t\t\t[1 color rgb <1, 2, 3>]\n\t\t}\n\t\tscale 2\n\t}\n}\n\n"
-			 + "/------------------------------------------------------------------------\n"
-			 + "// patient ---------------------------------------------------------------\n"
-			 + "#declare Patient =\nsphere {\n\t<1, 1, 1>, 3\n\ttexture {\n\t\tpigment {\n\t\t\t"
-			 + "color rgb <0, 1, 0>\n\t\t}\n\t\tfinish {\n\t\t\tambient 0.1\n\t\t\tdiffuse 0.85\n\t\t\t"
-			 + "phong 1\n\t\t}\n\t}\n}\n\n"
-			 + "//------------------------------------------------------------------------\n"
-			 + "// splines ---------------------------------------------------------------\n");
-			*/
+					+ "// POV-Ray 3.7 Scene File \"patients.pov\"\n// created by Manuel Huerbin, Dennis Schwarz and "
+					+ "Miriam Scholer, FHNW, 2015\n\n"
+					+ "//------------------------------------------------------------------------\n"
+					+ "// general settings ------------------------------------------------------\n"
+					+ "#version 3.7;\nglobal_settings {\n\tassumed_gamma 1.0\n}\n"
+					+ "#include \"colors.inc\"\n#include \"textures.inc\"\n#include \"math.inc\"\n#include "
+					+ "\"transforms.inc\"\n#include \"usb.pov\" //usb-model (transparent)\n"
+					+ "\n//------------------------------------------------------------------------\n"
+					+ "// camera ----------------------------------------------------------------\n"
+					+ "#declare Camera =\ncamera {\n\tperspective\n\tup <0, 1, 0>\n\tright -x * image_width / image_height"
+					+ "\n\tlocation <0, 0, 1092.539>\n\tlook_at <0, 0, 1091.539>\n\tangle 22.34049 //horizontal FOV angle"
+					+ "\n\trotate <0, 0, -33.51162> //roll\n\trotate <44.54607, 0, 0> //pitch"
+					+ "\n\trotate <0, -44.05138, 0> //yaw\n\ttranslate <201.5, 233.35, 32.205>\n}\n"
+					+ "camera {\n\tCamera\n}\n\n"
+					+ "//------------------------------------------------------------------------\n"
+					+ "// background ------------------------------------------------------------\n"
+					+ "background {\n\tcolor srgb <1, 1, 1>\n}\n\n"
+					+ "//------------------------------------------------------------------------\n"
+					+ "// sun -------------------------------------------------------------------\n"
+					+ "light_source {\n\t<-1000, 2500, -2500>\n\tcolor <1, 1, 1>\n}\n\n"
+					+ "//------------------------------------------------------------------------\n"
+					+ "// sky -------------------------------------------------------------------\n"
+					+ "sky_sphere {\n\tpigment {\n\t\tgradient <0, 0, 0>\n\t\tcolor_map {\n\t\t\t"
+					+ "[0 color rgb <1, 1, 1>]\n\t\t\t[1 color rgb <1, 2, 3>]\n\t\t}\n\t\tscale 2\n\t}\n}\n\n"
+					+ "/------------------------------------------------------------------------\n"
+					+ "// patient --------------------------------------------------------------\n"
+					+ "#declare Patient =\nsphere {\n\t<1, 1, 1>, 3\n\ttexture {\n\t\tpigment {\n\t\t\t"
+					+ "color rgb <0, 1, 0>\n\t\t}\n\t\tfinish {\n\t\t\tambient 0.1\n\t\t\tdiffuse 0.85\n\t\t\t"
+					+ "phong 1\n\t\t}\n\t}\n}\n\n"
+					+ "//------------------------------------------------------------------------\n"
+					+ "// splines ---------------------------------------------------------------\n"
+					+ "#declare Spline1 =\nspline {\n\tnatural spline\n");
+
 			while ((line = br.readLine()) != null) {
-				counter++;
-				
 				// use comma as separator
 				String[] details = line.split(cvsSplitBy);
 				Department from = findDepartment(details[0]);
@@ -136,60 +138,39 @@ public class DAOTextfile implements DAO {
 
 				Movement movement = new Movement(from, to, entry, type);
 				movements.add(movement);
-				
-				/*
-				output.print("#declare Spline" + counter + " =\n");
-		
-				spline {
-					natural_spline
-					-0.20, <0, 0, 0>, //controll point
-					0.00, <74, 230, 16.25>, //start
-					0.10, <18.5, 310, 20.3>,
-					0.20, <171, 175, 24.1>,
-					0.30, <312, 140.5, 19.2>,
-					0.40, <325, 147, 22.1>,
-					0.50, <140, 175, 12.2>,
-					0.60, <314, 124, 22.1>,
-					0.70, <140, 175, 12.2>,
-					0.80, <325, 147, 22.1>,
-					0.90, <312, 140.5, 19.2>,
-					1.00, <171, 175, 24.1>, //end
-					1.20, <314, 124, 22.1> //controll point
-				}
-					
-				//------------------------------------------------------------------------     
-				// loop ------------------------------------------------------------------ 
-				#declare Start = 0; //start
-				#declare End = 1; //end
-				#while (Start < End)         
-					object {
-						Patient
-						translate Spline(mod((clock + Start / End), 5))     
-					} 
-					#declare Start = Start + 1; //steps
-				#end
-				*/
-				
+
 				// output (only existing departments)
 				if (!(from.getID() == 666 || to.getID() == 666)) {
-					/*
-					 * Console-output
-					 */ 
-					 /* System.out.print(movement.whereAmI().getxCoordinate() +
-					 * "\t" + movement.whereAmI().getyCoordinate() + "\t" +
-					 * movement.whereAmI().getzCoordinate() + "\t" +
-					 * movement.whereDoIGo().getxCoordinate() + "\t" +
-					 * movement.whereDoIGo().getyCoordinate() + "\t" +
-					 * movement.whereDoIGo().getzCoordinate() + "\t" +
-					 * movement.whenDoIStart() + "\t" + movement.howDoIMove() +
-					 * "\n" + searchFirstDate(movements) );
-					 */
+					output.print(// movement.whenDoIStart() + ", <"
+					"\tZeit" + ", <" + movement.whereDoIGo().getxCoordinate()
+							+ ", " + movement.whereDoIGo().getyCoordinate()
+							+ ", " + movement.whereDoIGo().getzCoordinate()
+							+ ">,\n");
+
+					// separates "patients" (by "exit")
+					if (to.getID() == 0) {
+						output.print("}\n#declare Spline" + counter
+								+ " =\nspline {\n\tnatural spline\n");
+						counter++;
+					}
 				}
 			}
-			
+
+			output.print("}\n\n//------------------------------------------------------------------------"
+					+ "\n// loop ------------------------------------------------------------------"
+					+ "\n#declare Start = 0; //start\n#declare End = 1; //end\n#while (Start < End)\n");
+
+			for (int i = 1; i < counter - 1; i++) {
+				output.print("\tobject {\n\t\tPatient\n\t\ttranslate Spline"
+						+ i + "(mod((clock + Start / End), 5))" + "\n\t}\n");
+			}
+
+			output.print("\t#declare Start = Start + 1; //steps\n#end");
+
 			// print out first and last date of list
-			System.out.println(searchFirstDate(movements));
-			System.out.println(searchLastDate(movements));
+			// System.out.println(searchFirstDate(movements));
+			// System.out.println(searchLastDate(movements));
+
 			output.close();
 
 		} catch (FileNotFoundException e) {
@@ -215,6 +196,7 @@ public class DAOTextfile implements DAO {
 		return depMov;
 	}
 
+	// find department
 	public Department findDepartment(String details) {
 		Department temp = new Department(0, 0, 0, 0, 0);
 		int ID = 0;
@@ -251,7 +233,7 @@ public class DAOTextfile implements DAO {
 
 		for (int i = 0; i < movements.size(); i++) {
 			movement = (Movement) movements.get(i);
-			
+
 			if (i == 0) {
 				firstDate = movement.whenDoIStart();
 			}
@@ -271,7 +253,7 @@ public class DAOTextfile implements DAO {
 
 		for (int i = 0; i < movements.size(); i++) {
 			movement = (Movement) movements.get(i);
-			
+
 			if (i == 0) {
 				lastDate = movement.whenDoIStart();
 			}
