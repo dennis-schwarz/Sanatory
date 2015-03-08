@@ -39,8 +39,8 @@ public class DAOTextfile implements DAO {
 	@SuppressWarnings("resource")
 	public ArrayList<ArrayList> getAllData() {
 		String csvFileDepartments = "data/departments.txt"; // departments einlesen
-		String csvFileMovements = "data/movements.txt";
-		String csvFilePOV = "data/movements.txt";
+		String csvFileMovements = "data/test";
+		String csvFilePOV = "data/test";
 		BufferedReader brDepartments = null;
 		BufferedReader brMovements = null;
 		BufferedReader brPOV = null;
