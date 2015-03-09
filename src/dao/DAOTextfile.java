@@ -36,22 +36,19 @@ public class DAOTextfile implements DAO {
 	}
 
 	// Datenverarbeitung Departments
-	@SuppressWarnings({ "resource", "unused" })
+	@SuppressWarnings("resource")
 	public ArrayList<ArrayList> getAllData() {
-		String csvFileDepartments = "data/departments.txt"; // departments einlesen
-		String csvFileMovements = "data/movements.txt";
-		String csvFilePOV = "data/movements.txt";
-		BufferedReader brDepartments = null;
-		BufferedReader brMovements = null;
-		BufferedReader brPOV = null;
+		String csvFile = "data/departments.txt"; // departments einlesen
+		BufferedReader br = null;
+		String line = "";
 		String cvsSplitBy = "\t";
 
 		try {
-			brDepartments = new BufferedReader(new FileReader(csvFileDepartments));
-			String lineDepartments = brDepartments.readLine();
-			while ((lineDepartments = brDepartments.readLine()) != null) {
+			br = new BufferedReader(new FileReader(csvFile));
+			line = br.readLine();
+			while ((line = br.readLine()) != null) {
 				// use comma as separator
-				String[] details = lineDepartments.split(cvsSplitBy);
+				String[] details = line.split(cvsSplitBy);
 				Department department = new Department(
 						Integer.parseInt(details[0]),
 						Double.parseDouble(details[1]),
@@ -68,33 +65,33 @@ public class DAOTextfile implements DAO {
 			e.printStackTrace();
 
 		} finally {
-			if (brDepartments != null) {
+			if (br != null) {
 
 				try {
-					brDepartments.close();
+					br.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		// Datenverarbeitung Departments fertig
 		
-		// Datenverarbeitung Movements first
+		// Datenverarbeitung Movements (first)
+		// zuerst einmal "movementsTest.txt"-File einlesen, um Anzahl Zeilen
+		// und das erste und letzte Datum zu bestimmen (fuer Einteilung fuer
+		// POVRay)
+		csvFile = "data/movements.txt";
 		Date entry = null;
 		Date firstDate = null;
 		Date lastDate = null;
-
+		
 		try {
-			// zuerst einmal "movementsTest.txt"-File einlesen, um Anzahl Zeilen
-			// und das erste und letzte Datum zu bestimmen (fuer Einteilung fuer
-			// POVRay)
-			brMovements = new BufferedReader(new FileReader(csvFileMovements));
-			String lineMovements = brMovements.readLine();
+			br = new BufferedReader(new FileReader(csvFile));
+			line = br.readLine();
 			int type = 0;
 
-			while ((lineMovements = brMovements.readLine()) != null) {
+			while ((line = br.readLine()) != null) {
 				lineCounterBeginning++;
-				String[] searchDates = lineMovements.split(cvsSplitBy);
+				String[] searchDates = line.split(cvsSplitBy);
 				Department from = findDepartment(searchDates[0]);
 				Department to = findDepartment(searchDates[1]);
 				
@@ -111,13 +108,16 @@ public class DAOTextfile implements DAO {
 
 				}
 
-				Movement movementCurrent = new Movement(from, to, entry, type);
-				movements.add(movementCurrent);
-				movementsAdmin.add(movementCurrent);
+				Movement movement = new Movement(from, to, entry, type);
+				movements.add(movement);
+				movementsAdmin.add(movement);
 			}
 			
 			firstDate = searchFirstDate(movements);
 			lastDate = searchLastDate(movements);
+			long diff = lastDate.getTime() - firstDate.getTime();
+			long diffInHours = TimeUnit.MILLISECONDS.toHours(diff);
+			System.out.println(diffInHours);
 			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -127,25 +127,24 @@ public class DAOTextfile implements DAO {
 
 		} finally {
 
-			if (brMovements != null) {
+			if (br != null) {
 				try {
-					brMovements.close();
+					br.close();
 
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		// Datenverarbeitung Movements first fertig
 		
 		// movements.txt ein zweitesMal lesen und POVRay-File generieren
 		try {
-			brPOV = new BufferedReader(new FileReader(csvFilePOV));
-			String linePOV = brPOV.readLine();
+			br = new BufferedReader(new FileReader(csvFile));
+			line = br.readLine();
 			PrintWriter output = new PrintWriter("data/usb.pov");
 
 			output.print("//------------------------------------------------------------------------\n"
-					+ "// POV-Ray 3.7 Scene File \"patients.pov\"\n// created by Manuel Huerbin, Dennis Schwarz and "
+					+ "// POV-Ray 3.7 Scene File \"usb.pov\"\n// created by Manuel Huerbin, Dennis Schwarz and "
 					+ "Miriam Scholer, FHNW, 2015\n\n"
 					+ "//------------------------------------------------------------------------\n"
 					+ "// general settings ------------------------------------------------------\n"
@@ -178,10 +177,10 @@ public class DAOTextfile implements DAO {
 					+ "// splines ---------------------------------------------------------------\n"
 					+ "#declare Spline1 =\nspline {\n\tnatural_spline\n");
 
-			while ((linePOV = brPOV.readLine()) != null) {
+			while ((line = br.readLine()) != null) {
 				lineCounterCheck++;
 				// use comma as separator
-				String[] details = linePOV.split(cvsSplitBy);
+				String[] details = line.split(cvsSplitBy);
 				Department from = findDepartment(details[0]);
 				Department to = findDepartment(details[1]);
 
@@ -201,19 +200,17 @@ public class DAOTextfile implements DAO {
 
 				Movement movement = new Movement(from, to, entry, type);
 				movements.add(movement);
-
+				
 				// output (only existing departments)
 				if (!(from.getID() == 666 || to.getID() == 666)) {
 					Date currentDate = movement.whenDoIStart();
 					long diff = currentDate.getTime() - firstDate.getTime();
 					long diffInHours = TimeUnit.MILLISECONDS.toHours(diff);
-							
-					output.print(diffInHours / 1000.00 + ", <" + movement.whereDoIGo().getxCoordinate() + ", "
+					output.print(diffInHours + ", <" + movement.whereDoIGo().getxCoordinate() + ", "
 							+ movement.whereDoIGo().getyCoordinate() + ", "
 							+ movement.whereDoIGo().getzCoordinate() + ">,\n");
 
-					// separates "patients" (by "exit") and checks the last
-					// patient
+					// separates "patients" (by "exit") and checks if it is the last patient
 					if (to.getID() == 0
 							&& lineCounterCheck < lineCounterBeginning - 1) {
 						output.print("}\n#declare Spline" + splineCounter
@@ -224,15 +221,12 @@ public class DAOTextfile implements DAO {
 			}
 
 			output.print("}\n\n//------------------------------------------------------------------------"
-					+ "\n// loop ------------------------------------------------------------------"
-					+ "\n#declare Start = 0; //start\n#declare End = 1; //end\n#while (Start < End)\n");
+					+ "\n// loop ------------------------------------------------------------------\n");
 
 			for (int i = 1; i < splineCounter; i++) {
-				output.print("\tobject {\n\t\tPatient\n\t\ttranslate Spline"
-						+ i + "(mod((clock + Start / End), 5))" + "\n\t}\n");
+				output.print("object {\n\tPatient\n\ttranslate Spline"
+						+ i + "(clock)" + "\n}\n");
 			}
-
-			output.print("\t#declare Start = Start + 1; //steps\n#end");
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -242,9 +236,9 @@ public class DAOTextfile implements DAO {
 
 		} finally {
 
-			if (brPOV != null) {
+			if (br != null) {
 				try {
-					brPOV.close();
+					br.close();
 
 				} catch (IOException e) {
 					e.printStackTrace();
