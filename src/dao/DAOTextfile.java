@@ -214,7 +214,7 @@ public class DAOTextfile implements DAO {
 							&& lineCounterCheck <= lineCounterBeginning) {
 						output.print("#declare Spline" + splineCounter
 								+ " =\nspline {\n\tlinear_spline\n\t"
-								+ (diffInMinutes - 30)
+								+ (diffInMinutes - 30) // start movement at the beginning (30 minutes earlier)
 								+ ", <92.0, 183.0, 16.25>");
 						splineCounter++;
 					}
@@ -223,14 +223,17 @@ public class DAOTextfile implements DAO {
 							+ movement.whereDoIGo().getxCoordinate() + ", "
 							+ movement.whereDoIGo().getyCoordinate() + ", "
 							+ movement.whereDoIGo().getzCoordinate() + ">");
-
-					// prints "}" at the end of one patient
+					
+					// prints "}" at the end of the patient
 					if (to.getID() == 0
 							&& lineCounterCheck <= lineCounterBeginning) {
 						output.print("\n}\n");
-					}
+						//splineCounter++;
+					}	
 				}
 			}
+			
+			System.out.println(splineCounter - 1);
 			
 			output.print("\n//------------------------------------------------------------------------"
 					+ "\n// loop ------------------------------------------------------------------\n");
