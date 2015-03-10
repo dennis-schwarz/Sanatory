@@ -114,6 +114,7 @@ public class DAOTextfile implements DAO {
 			}
 			
 			firstDate = searchFirstDate(movements);
+			
 			lastDate = searchLastDate(movements);
 			long diff = lastDate.getTime() - firstDate.getTime();
 			long diffInHours = TimeUnit.MILLISECONDS.toHours(diff);
@@ -175,7 +176,7 @@ public class DAOTextfile implements DAO {
 					+ "phong 1\n\t\t}\n\t}\n}\n\n"
 					+ "//------------------------------------------------------------------------\n"
 					+ "// splines ---------------------------------------------------------------\n"
-					+ "#declare Spline1 =\nspline {\n\tnatural_spline\n");
+					+ "#declare Spline1 =\nspline {\n\tlinear_spline\n\t00000, <0.00, 0.00, 0.00>");
 
 			while ((line = br.readLine()) != null) {
 				lineCounterCheck++;
@@ -206,15 +207,16 @@ public class DAOTextfile implements DAO {
 					Date currentDate = movement.whenDoIStart();
 					long diff = currentDate.getTime() - firstDate.getTime();
 					long diffInHours = TimeUnit.MILLISECONDS.toHours(diff);
-					output.print(diffInHours + ", <" + movement.whereDoIGo().getxCoordinate() + ", "
+					
+					output.print(",\n\t" + diffInHours + ", <" + movement.whereDoIGo().getxCoordinate() + ", "
 							+ movement.whereDoIGo().getyCoordinate() + ", "
-							+ movement.whereDoIGo().getzCoordinate() + ">,\n");
+							+ movement.whereDoIGo().getzCoordinate() + ">");
 
 					// separates "patients" (by "exit") and checks if it is the last patient
 					if (to.getID() == 0
 							&& lineCounterCheck < lineCounterBeginning - 1) {
-						output.print("}\n#declare Spline" + splineCounter
-								+ " =\nspline {\n\tnatural_spline\n");
+						output.print("\n}\n#declare Spline" + splineCounter
+								+ " =\nspline {\n\tlinear_spline\n\t00000, <0.00, 0.00, 0.00>");
 						splineCounter++;
 					}
 				}
