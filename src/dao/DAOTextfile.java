@@ -23,7 +23,7 @@ public class DAOTextfile implements DAO {
 	ArrayList<Movement> movementsAdmin = new ArrayList<Movement>(); // to find number of lines and first and last date
 	ArrayList<Movement> movements = new ArrayList<Movement>();
 	ArrayList<ArrayList> depMov = new ArrayList<ArrayList>();
-	int splineCounter = 2;
+	int splineCounter = 1;
 	int lineCounterBeginning = 0;
 	int lineCounterCheck = 0;
 
@@ -74,16 +74,16 @@ public class DAOTextfile implements DAO {
 				}
 			}
 		}
-		
+
 		// Datenverarbeitung Movements (first)
-		// zuerst einmal "movementsTest.txt"-File einlesen, um Anzahl Zeilen
+		// zuerst einmal "movements.txt"-File einlesen, um Anzahl Zeilen
 		// und das erste und letzte Datum zu bestimmen (fuer Einteilung fuer
 		// POVRay)
 		csvFile = "data/movements.txt";
 		Date entry = null;
 		Date firstDate = null;
 		Date lastDate = null;
-		
+
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 			line = br.readLine();
@@ -94,14 +94,14 @@ public class DAOTextfile implements DAO {
 				String[] searchDates = line.split(cvsSplitBy);
 				Department from = findDepartment(searchDates[0]);
 				Department to = findDepartment(searchDates[1]);
-				
+
 				try {
 					DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 					entry = df.parse(searchDates[2]);
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
-			
+
 				try {
 					type = Integer.parseInt(searchDates[3]);
 				} catch (NumberFormatException e) {
@@ -112,13 +112,13 @@ public class DAOTextfile implements DAO {
 				movements.add(movement);
 				movementsAdmin.add(movement);
 			}
-			
+
 			firstDate = searchFirstDate(movements);
-			
 			lastDate = searchLastDate(movements);
 			long diff = lastDate.getTime() - firstDate.getTime();
-			long diffInHours = TimeUnit.MILLISECONDS.toHours(diff);
-			System.out.println(diffInHours);
+			long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diff);
+			System.out.println(diffInMinutes);
+			System.out.println(lineCounterBeginning);
 			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -137,7 +137,7 @@ public class DAOTextfile implements DAO {
 				}
 			}
 		}
-		
+
 		// movements.txt ein zweitesMal lesen und POVRay-File generieren
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
@@ -175,8 +175,7 @@ public class DAOTextfile implements DAO {
 					+ "color rgb <0, 1, 0>\n\t\t}\n\t\tfinish {\n\t\t\tambient 0.1\n\t\t\tdiffuse 0.85\n\t\t\t"
 					+ "phong 1\n\t\t}\n\t}\n}\n\n"
 					+ "//------------------------------------------------------------------------\n"
-					+ "// splines ---------------------------------------------------------------\n"
-					+ "#declare Spline1 =\nspline {\n\tlinear_spline\n\t00000, <0.00, 0.00, 0.00>");
+					+ "// splines ---------------------------------------------------------------\n");
 
 			while ((line = br.readLine()) != null) {
 				lineCounterCheck++;
@@ -201,33 +200,44 @@ public class DAOTextfile implements DAO {
 
 				Movement movement = new Movement(from, to, entry, type);
 				movements.add(movement);
-				
+
 				// output (only existing departments)
 				if (!(from.getID() == 666 || to.getID() == 666)) {
+
 					Date currentDate = movement.whenDoIStart();
 					long diff = currentDate.getTime() - firstDate.getTime();
-					long diffInHours = TimeUnit.MILLISECONDS.toHours(diff);
-					
-					output.print(",\n\t" + diffInHours + ", <" + movement.whereDoIGo().getxCoordinate() + ", "
+					long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diff);
+
+					// prints the beginning of a patient (coordinates of the
+					// entry-point and the entry (30 minutes before))
+					if (from.getID() == 0
+							&& lineCounterCheck <= lineCounterBeginning) {
+						output.print("#declare Spline" + splineCounter
+								+ " =\nspline {\n\tlinear_spline\n\t"
+								+ (diffInMinutes - 30)
+								+ ", <92.0, 183.0, 16.25>");
+						splineCounter++;
+					}
+
+					output.print(",\n\t" + diffInMinutes + ", <"
+							+ movement.whereDoIGo().getxCoordinate() + ", "
 							+ movement.whereDoIGo().getyCoordinate() + ", "
 							+ movement.whereDoIGo().getzCoordinate() + ">");
 
-					// separates "patients" (by "exit") and checks if it is the last patient
+					// prints "}" at the end of one patient
 					if (to.getID() == 0
-							&& lineCounterCheck < lineCounterBeginning - 1) {
-						output.print("\n}\n#declare Spline" + splineCounter
-								+ " =\nspline {\n\tlinear_spline\n\t00000, <0.00, 0.00, 0.00>");
-						splineCounter++;
+							&& lineCounterCheck <= lineCounterBeginning) {
+						output.print("\n}\n");
 					}
 				}
 			}
-
-			output.print("}\n\n//------------------------------------------------------------------------"
+			
+			output.print("\n//------------------------------------------------------------------------"
 					+ "\n// loop ------------------------------------------------------------------\n");
 
 			for (int i = 1; i < splineCounter; i++) {
-				output.print("object {\n\tPatient\n\ttranslate Spline"
-						+ i + "(clock)" + "\n}\n");
+				output.print("object {\n\tPatient\n\ttranslate Spline" + i
+						+ "(clock)" + "\n}\n");
 			}
 
 		} catch (FileNotFoundException e) {
@@ -255,7 +265,8 @@ public class DAOTextfile implements DAO {
 
 	// find department
 	public Department findDepartment(String details) {
-		Department temp = new Department(0, 0, 0, 0, 0);
+		Department temp = new Department(0, 92.0, 183.0, 16.25, 0); // goes to exit
+																// at the end
 		int ID = 0;
 		boolean departmentExist = false;
 
