@@ -11,50 +11,45 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-
 import model.Department;
 import model.Movement;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "resource", "unused" })
 public class DAOTextfile implements DAO {
 	// declaration and initialization
 	private static DAOTextfile uniqueInstance = null;
 	ArrayList<Department> departments = new ArrayList<Department>();
-	ArrayList<Movement> movementsAdmin = new ArrayList<Movement>(); // to find number of lines and first and last date
 	ArrayList<Movement> movements = new ArrayList<Movement>();
 	ArrayList<ArrayList> depMov = new ArrayList<ArrayList>();
-	int splineCounter = 1;
-	int lineCounterBeginning = 0;
-	int lineCounterCheck = 0;
+	int spline = 1;
 
-	// constructor
 	public DAOTextfile getUniqueInstance() {
 		if (uniqueInstance == null) {
 			uniqueInstance = new DAOTextfile();
 		}
+
 		return uniqueInstance;
 	}
 
-	// Datenverarbeitung Departments
-	@SuppressWarnings("resource")
 	public ArrayList<ArrayList> getAllData() {
-		String csvFile = "data/departments.txt"; // departments einlesen
+		// read "departments.txt"
+		String csvFile = "data/departments.txt";
 		BufferedReader br = null;
 		String line = "";
 		String cvsSplitBy = "\t";
 
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
-			line = br.readLine();
+			line = br.readLine(); // skip first line (title)
+
 			while ((line = br.readLine()) != null) {
-				// use comma as separator
 				String[] details = line.split(cvsSplitBy);
 				Department department = new Department(
-						Integer.parseInt(details[0]),
-						Double.parseDouble(details[1]),
-						Double.parseDouble(details[2]),
-						Double.parseDouble(details[3]),
-						Double.parseDouble(details[4]));
+						Integer.parseInt(details[0]), // ID
+						Double.parseDouble(details[1]), // xCoordinate
+						Double.parseDouble(details[2]), // yCoordinate
+						Double.parseDouble(details[3]), // zCoordinate
+						Double.parseDouble(details[4])); // weightingFactor
 				departments.add(department);
 			}
 
@@ -75,75 +70,48 @@ public class DAOTextfile implements DAO {
 			}
 		}
 
-		// Datenverarbeitung Movements (first)
-		// zuerst einmal "movements.txt"-File einlesen, um Anzahl Zeilen
-		// und das erste und letzte Datum zu bestimmen (fuer Einteilung fuer
-		// POVRay)
+		/*
+		 * read "movements.txt"
+		 * 
+		 * defines first and last date generates output-file "usb.pov"
+		 */
 		csvFile = "data/movements.txt";
+		Department from = null;
+		Department to = null;
 		Date entry = null;
+		int type = 0;
 		Date firstDate = null;
 		Date lastDate = null;
 
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
-			line = br.readLine();
-			int type = 0;
+			line = br.readLine(); // skip first line (title)
 
 			while ((line = br.readLine()) != null) {
-				lineCounterBeginning++;
-				String[] searchDates = line.split(cvsSplitBy);
-				Department from = findDepartment(searchDates[0]);
-				Department to = findDepartment(searchDates[1]);
+				String[] details = line.split(cvsSplitBy);
+				from = checkDepartment(details[0]); // from
+				to = checkDepartment(details[1]); // to
 
 				try {
 					DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-					entry = df.parse(searchDates[2]);
+					entry = df.parse(details[2]); // entry
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
 
-				try {
-					type = Integer.parseInt(searchDates[3]);
-				} catch (NumberFormatException e) {
-
-				}
-
+				type = Integer.parseInt(details[3]); // type
 				Movement movement = new Movement(from, to, entry, type);
 				movements.add(movement);
-				movementsAdmin.add(movement);
 			}
 
+			// define first an last date of all movements
 			firstDate = searchFirstDate(movements);
 			lastDate = searchLastDate(movements);
-			long diff = lastDate.getTime() - firstDate.getTime();
-			long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diff);
-			System.out.println(diffInMinutes);
-			System.out.println(lineCounterBeginning);
-			
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
 
-		} catch (IOException e) {
-			e.printStackTrace();
-
-		} finally {
-
-			if (br != null) {
-				try {
-					br.close();
-
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
-		// movements.txt ein zweitesMal lesen und POVRay-File generieren
-		try {
-			br = new BufferedReader(new FileReader(csvFile));
-			line = br.readLine();
+			// output of movements-array
 			PrintWriter output = new PrintWriter("data/usb.pov");
 
+			// general information for the output-File "usb.pov"
 			output.print("//------------------------------------------------------------------------\n"
 					+ "// POV-Ray 3.7 Scene File \"usb.pov\"\n// created by Manuel Huerbin, Dennis Schwarz and "
 					+ "Miriam Scholer, FHNW, 2015\n\n"
@@ -177,70 +145,47 @@ public class DAOTextfile implements DAO {
 					+ "//------------------------------------------------------------------------\n"
 					+ "// splines ---------------------------------------------------------------\n");
 
-			while ((line = br.readLine()) != null) {
-				lineCounterCheck++;
-				// use comma as separator
-				String[] details = line.split(cvsSplitBy);
-				Department from = findDepartment(details[0]);
-				Department to = findDepartment(details[1]);
+			// movements of each patient
+			for (int i = 0; i < movements.size(); i++) {
+				// department exists
+				if (!(movements.get(i).whereAmI() == null || movements.get(i)
+						.whereDoIGo() == null)) {
+					Date currentDate = movements.get(i).whenDoIStart();
+					long diff = currentDate.getTime() - firstDate.getTime(); // time to "arrive"
+					long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diff); // time in minutes
 
-				int type = 0;
-				try {
-					DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-					entry = df.parse(details[2]);
-				} catch (ParseException e) {
-					e.printStackTrace();
-				}
-
-				try {
-					type = Integer.parseInt(details[3]);
-				} catch (NumberFormatException e) {
-
-				}
-
-				Movement movement = new Movement(from, to, entry, type);
-				movements.add(movement);
-
-				// output (only existing departments)
-				if (!(from.getID() == 666 || to.getID() == 666)) {
-
-					Date currentDate = movement.whenDoIStart();
-					long diff = currentDate.getTime() - firstDate.getTime();
-					long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diff);
-
-					// prints the beginning of a patient (coordinates of the
-					// entry-point and the entry (30 minutes before))
-					if (from.getID() == 0
-							&& lineCounterCheck <= lineCounterBeginning) {
-						output.print("#declare Spline" + splineCounter
-								+ " =\nspline {\n\tlinear_spline\n\t"
-								+ (diffInMinutes - 30) // start movement at the beginning (30 minutes earlier)
-								+ ", <92.0, 183.0, 16.25>");
-						splineCounter++;
+					// new patient
+					if (movements.get(i).whereAmI().getID() == 0) { // _ENTRY_
+						output.print("#declare Spline" + spline + " =\nspline {\n\tlinear_spline\n");
 					}
 
-					output.print(",\n\t" + diffInMinutes + ", <"
-							+ movement.whereDoIGo().getxCoordinate() + ", "
-							+ movement.whereDoIGo().getyCoordinate() + ", "
-							+ movement.whereDoIGo().getzCoordinate() + ">");
-					
-					// prints "}" at the end of the patient
-					if (to.getID() == 0
-							&& lineCounterCheck <= lineCounterBeginning) {
-						output.print("\n}\n");
-						//splineCounter++;
-					}	
+					// as long as patients does not _EXIT_
+					if (!(movements.get(i).whereDoIGo().getID() == 0)) {
+						// prints the coordinates of the destination
+						output.print("\t"
+								+ diffInMinutes + ", <"
+								+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
+								+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
+								+ movements.get(i).whereDoIGo().getzCoordinate() + ">,\n");
+	
+					} else if (movements.get(i).whereDoIGo().getID() == 0) {
+						// prints leaving coordinates "}" at the end (_EXIT_) of each patient
+						output.print("\t"
+								+ diffInMinutes + ", <"
+								+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
+								+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
+								+ movements.get(i).whereDoIGo().getzCoordinate() + ">\n" + "}\n");
+						spline++;
+					}
 				}
 			}
-			
-			System.out.println(splineCounter - 1);
-			
+
+			// generates the patient-objects for the output-file "usb.pov"
 			output.print("\n//------------------------------------------------------------------------"
 					+ "\n// loop ------------------------------------------------------------------\n");
 
-			for (int i = 1; i < splineCounter; i++) {
-				output.print("object {\n\tPatient\n\ttranslate Spline" + i
-						+ "(clock)" + "\n}\n");
+			for (int i = 1; i < spline; i++) {
+				output.print("object {\n\tPatient\n\ttranslate Spline" + i + "(clock)" + "\n}\n");
 			}
 
 		} catch (FileNotFoundException e) {
@@ -263,38 +208,37 @@ public class DAOTextfile implements DAO {
 
 		depMov.add(departments);
 		depMov.add(movements);
+		
 		return depMov;
 	}
 
-	// find department
-	public Department findDepartment(String details) {
-		Department temp = new Department(0, 92.0, 183.0, 16.25, 0); // goes to exit
-																// at the end
+	// check if department exists
+	public Department checkDepartment(String details) {
 		int ID = 0;
-		boolean departmentExist = false;
+		Department department = new Department(ID, 92.0, 183.0, 16.25, 0); // default start (emergency station)
+		boolean departmentExists = false;
 
 		try {
-			ID = Integer.parseInt(details);
+			ID = Integer.parseInt(details); // department is not _ENTRY_ or _EXIT_
 		} catch (NumberFormatException e) {
 			ID = 0;
 		}
 
 		if (ID != 0) {
 			for (int i = 0; i < departments.size(); i++) {
-
-				if (departments.get(i).getID() == ID) {
-					temp = departments.get(i);
-					departmentExist = true;
+				if (departments.get(i).getID() == ID) { // checks if department exists in "departments.txt"
+					department = departments.get(i);
+					departmentExists = true;
 				}
 			}
 
-			// department does not exist (evil department with ID 666)
-			if (departmentExist == false) {
-				temp = new Department(666, 0, 0, 0, 0);
+			// department does not exist
+			if (departmentExists == false) {
+				department = null;
 			}
 		}
 
-		return temp;
+		return department;
 	}
 
 	// first Date
