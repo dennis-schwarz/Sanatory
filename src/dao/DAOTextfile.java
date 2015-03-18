@@ -73,7 +73,7 @@ public class DAOTextfile implements DAO {
 		/*
 		 * read "movements.txt"
 		 * 
-		 * defines first and last date and generates output-file "usb.pov"
+		 * defines first and last date and generates output-file "patients.pov"
 		 */
 		csvFile = "data/movements.txt";
 		Department from = null;
@@ -112,9 +112,9 @@ public class DAOTextfile implements DAO {
 			// output-file out of movements-array
 			PrintWriter output = new PrintWriter("data/patients.pov");
 
-			// general information for the output-File "usb.pov"
+			// general information for the output-File "patients.pov"
 			output.print("//------------------------------------------------------------------------\n"
-					+ "// POV-Ray 3.7 Scene File \"usb.pov\"\n// created by Manuel Huerbin, Dennis Schwarz and "
+					+ "// POV-Ray 3.7 Scene File \"patients.pov\"\n// created by Manuel Huerbin, Dennis Schwarz and "
 					+ "Miriam Scholer, FHNW, 2015\n\n"
 					+ "//------------------------------------------------------------------------\n"
 					+ "// general settings ------------------------------------------------------\n"
@@ -152,7 +152,7 @@ public class DAOTextfile implements DAO {
 				if (!(movements.get(i).whereAmI() == null || movements.get(i)
 						.whereDoIGo() == null)) {
 					Date currentDate = movements.get(i).whenDoIStart();
-					long diff = currentDate.getTime() - firstDate.getTime(); // time to "arrive"
+					long diff = currentDate.getTime() - firstDate.getTime(); // time to "arrive" (_ENTRY_)
 					long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diff); // time in minutes
 
 					// new patient
@@ -179,7 +179,7 @@ public class DAOTextfile implements DAO {
 									+ movements.get(i).whereDoIGo().getzCoordinate() + ">,\n");
 
 						} else if (movements.get(i).whereDoIGo().getID() == 0) {
-							// prints leaving coordinates and "}" at the end (_EXIT_) of each patient
+							// prints the end coordinates and "}" at the end (_EXIT_) of each patient
 							output.print("\t" + diffInMinutes + ", <"
 									+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
 									+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
@@ -191,7 +191,7 @@ public class DAOTextfile implements DAO {
 				}
 			}
 
-			// generates the patient-objects for the output-file "usb.pov"
+			// generates the patient-objects for the output-file "patients.pov"
 			output.print("\n//------------------------------------------------------------------------"
 					+ "\n// loop ------------------------------------------------------------------\n");
 
@@ -226,7 +226,7 @@ public class DAOTextfile implements DAO {
 	// check if department exists
 	public Department checkDepartment(String details) {
 		int ID = 0;
-		Department department = new Department(ID, 92.0, 183.0, 16.25, 0); // default start (emergency station)
+		Department department = new Department(ID, 92.0, 183.0, 16.25, 0); // default end (emergency station)
 		boolean departmentExists = false;
 
 		try {
@@ -292,7 +292,7 @@ public class DAOTextfile implements DAO {
 		return lastDate;
 	}
 
-	// calculate, when the patient has to leave the station to arrive at the next station at the right time (entry)
+	// calculate, when the patient has to leave the station to arrive at the right time at next station (entry)
 	public long calculateStart(long diffInMinutes, double xStart, double yStart, double zStart,
 			double xEnd, double yEnd, double zEnd) {
 		double xWay;
@@ -321,7 +321,7 @@ public class DAOTextfile implements DAO {
 			zWay = zEnd - zStart;
 		}
 
-		// whole way to go
+		// way to go
 		way = xWay + yWay + zWay;
 
 		// "time", when patient has to leave to arrive at the right time
