@@ -73,7 +73,7 @@ public class DAOTextfile implements DAO {
 		/*
 		 * read "movements.txt"
 		 * 
-		 * defines first and last date generates output-file "usb.pov"
+		 * defines first and last date and generates output-file "usb.pov"
 		 */
 		csvFile = "data/movements.txt";
 		Department from = null;
@@ -82,6 +82,7 @@ public class DAOTextfile implements DAO {
 		int type = 0;
 		Date firstDate = null;
 		Date lastDate = null;
+		boolean patientHasEntry = false;
 
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
@@ -104,12 +105,12 @@ public class DAOTextfile implements DAO {
 				movements.add(movement);
 			}
 
-			// define first an last date of all movements
+			// define first an last date of all "movements"
 			firstDate = searchFirstDate(movements);
 			lastDate = searchLastDate(movements);
 
-			// output of movements-array
-			PrintWriter output = new PrintWriter("data/usb.pov");
+			// output-file out of movements-array
+			PrintWriter output = new PrintWriter("data/patients.pov");
 
 			// general information for the output-File "usb.pov"
 			output.print("//------------------------------------------------------------------------\n"
@@ -157,25 +158,35 @@ public class DAOTextfile implements DAO {
 					// new patient
 					if (movements.get(i).whereAmI().getID() == 0) { // _ENTRY_
 						output.print("#declare Spline" + spline + " =\nspline {\n\tlinear_spline\n");
+						patientHasEntry = true;
 					}
 
-					// as long as patients does not _EXIT_
-					if (!(movements.get(i).whereDoIGo().getID() == 0)) {
-						// prints the coordinates of the destination
-						output.print("\t"
-								+ diffInMinutes + ", <"
-								+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
-								+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
-								+ movements.get(i).whereDoIGo().getzCoordinate() + ">,\n");
-	
-					} else if (movements.get(i).whereDoIGo().getID() == 0) {
-						// prints leaving coordinates "}" at the end (_EXIT_) of each patient
-						output.print("\t"
-								+ diffInMinutes + ", <"
-								+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
-								+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
-								+ movements.get(i).whereDoIGo().getzCoordinate() + ">\n" + "}\n");
-						spline++;
+					if (patientHasEntry == true) {
+						// calculates when the patient has to leave a station to arrive at the right time
+						diffInMinutes = calculateStart(diffInMinutes, movements.get(i).whereAmI().getxCoordinate(),
+								movements.get(i).whereAmI().getyCoordinate(),
+								movements.get(i).whereAmI().getzCoordinate(),
+								movements.get(i).whereDoIGo().getxCoordinate(),
+								movements.get(i).whereDoIGo().getyCoordinate(),
+								movements.get(i).whereDoIGo().getzCoordinate());
+
+						// as long as patients does not _EXIT_
+						if (!(movements.get(i).whereDoIGo().getID() == 0)) {
+							// prints the coordinates of the next station
+							output.print("\t" + diffInMinutes + ", <"
+									+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
+									+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
+									+ movements.get(i).whereDoIGo().getzCoordinate() + ">,\n");
+
+						} else if (movements.get(i).whereDoIGo().getID() == 0) {
+							// prints leaving coordinates and "}" at the end (_EXIT_) of each patient
+							output.print("\t" + diffInMinutes + ", <"
+									+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
+									+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
+									+ movements.get(i).whereDoIGo().getzCoordinate() + ">\n" + "}\n");
+							spline++;
+							patientHasEntry = false;
+						}
 					}
 				}
 			}
@@ -208,7 +219,7 @@ public class DAOTextfile implements DAO {
 
 		depMov.add(departments);
 		depMov.add(movements);
-		
+
 		return depMov;
 	}
 
@@ -279,6 +290,44 @@ public class DAOTextfile implements DAO {
 		}
 
 		return lastDate;
+	}
+
+	// calculate, when the patient has to leave the station to arrive at the next station at the right time (entry)
+	public long calculateStart(long diffInMinutes, double xStart, double yStart, double zStart,
+			double xEnd, double yEnd, double zEnd) {
+		double xWay;
+		double yWay;
+		double zWay;
+		double way;
+
+		// xWay to go
+		if (xStart > xEnd) {
+			xWay = xStart - xEnd;
+		} else {
+			xWay = xEnd - xStart;
+		}
+
+		// yWay to go
+		if (yStart > yEnd) {
+			yWay = yStart - yEnd;
+		} else {
+			yWay = yEnd - yStart;
+		}
+
+		// zWay to go
+		if (zStart > zEnd) {
+			zWay = zStart - zEnd;
+		} else {
+			zWay = zEnd - zStart;
+		}
+
+		// whole way to go
+		way = xWay + yWay + zWay;
+
+		// "time", when patient has to leave to arrive at the right time
+		// diffInMinutes = (long) (diffInMinutes - way);
+
+		return diffInMinutes;
 	}
 
 }
