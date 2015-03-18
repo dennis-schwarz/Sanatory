@@ -27,7 +27,6 @@ public class DAOTextfile implements DAO {
 		if (uniqueInstance == null) {
 			uniqueInstance = new DAOTextfile();
 		}
-		
 		return uniqueInstance;
 	}
 
