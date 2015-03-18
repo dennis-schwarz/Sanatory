@@ -107,7 +107,21 @@ public class DAOTextfile implements DAO {
 			// define first an last date of all "movements"
 			firstDate = searchFirstDate(movements);
 			lastDate = searchLastDate(movements);
-
+			
+			// define only one day to show
+			Date definedDate = null;
+			try {
+				DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+				definedDate = df.parse("20120320000000"); // which day should be shown (20.03.2012)
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			
+			long diffDefined = definedDate.getTime() - firstDate.getTime(); // start time of the day
+			long diffInMinutesDefined = TimeUnit.MILLISECONDS.toMinutes(diffDefined); // start time in minutes
+			long diffInMinutesDefinedEnd = diffInMinutesDefined + 1439; // end time of the day
+			System.out.println(diffInMinutesDefined + "\t" + diffInMinutesDefinedEnd); // start and end time of this day
+			
 			// output-file out of movements-array
 			PrintWriter output = new PrintWriter("data/patients.pov");
 
@@ -323,8 +337,14 @@ public class DAOTextfile implements DAO {
 		// way to go
 		way = xWay + yWay + zWay;
 
-		// "time", when patient has to leave to arrive at the right time
-		// diffInMinutes = (long) (diffInMinutes - way);
+		/*
+		 *  "time", when patient has to leave to arrive at the right time
+		 *  
+		 *  x-Achsen-Abstand vom Anfang bis zum Ende des USB = 320 x-Koordinatenpunkte
+		 *  Zeit: 10 min
+		 *  = 0.03125 min / Koordinatepunkt  
+		 */
+		diffInMinutes = (long) (diffInMinutes - (way * 0.03125));
 
 		return diffInMinutes;
 	}
