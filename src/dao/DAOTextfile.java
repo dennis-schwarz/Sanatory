@@ -108,11 +108,17 @@ public class DAOTextfile implements DAO {
 			firstDate = searchFirstDate(movements);
 			lastDate = searchLastDate(movements);
 			
+			// test-output
+			System.out.println(firstDate + "\t\t" + lastDate);
+			long test = lastDate.getTime() - firstDate.getTime(); // start time of the day
+			long test2 = TimeUnit.MILLISECONDS.toMinutes(test);
+			System.out.println(test2);
+			
 			// define only one day to show
 			Date definedDate = null;
 			try {
 				DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-				definedDate = df.parse("20120320000000"); // which day should be shown (20.03.2012)
+				definedDate = df.parse("20110811145800"); // which day should be shown (11.08.2011)
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
