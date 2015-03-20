@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 import model.Department;
 import model.Movement;
 
-@SuppressWarnings({ "rawtypes", "resource", "unused" })
+@SuppressWarnings({ "rawtypes", "resource" })
 public class DAOTextfile implements DAO {
 	// declaration and initialization
 	private static DAOTextfile uniqueInstance = null;
@@ -82,7 +82,8 @@ public class DAOTextfile implements DAO {
 		Date firstDate = null;
 		Date lastDate = null;
 		boolean patientHasEntry = false;
-
+		long first = 0;
+		
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 			line = br.readLine(); // skip first line (title)
@@ -108,25 +109,25 @@ public class DAOTextfile implements DAO {
 			firstDate = searchFirstDate(movements);
 			lastDate = searchLastDate(movements);
 			
-			// test-output
-			System.out.println(firstDate + "\t\t" + lastDate);
-			long test = lastDate.getTime() - firstDate.getTime(); // start time of the day
-			long test2 = TimeUnit.MILLISECONDS.toMinutes(test);
-			System.out.println(test2);
+			// console-output
+			System.out.println("First Date:  " + firstDate + "\nLast Date:   " + lastDate);
+			long difference = lastDate.getTime() - firstDate.getTime();
+			long differenceInMinutes = TimeUnit.MILLISECONDS.toMinutes(difference);
+			System.out.println("\nDifference in minutes:  " + differenceInMinutes + "\n");
 			
 			// define only one day to show
 			Date definedDate = null;
 			try {
 				DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-				definedDate = df.parse("20110811145800"); // which day should be shown (11.08.2011)
+				definedDate = df.parse("20120320000000"); // which day should be shown (20.03.2012)
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
 			
-			long diffDefined = definedDate.getTime() - firstDate.getTime(); // start time of the day
+			long diffDefined = definedDate.getTime() - firstDate.getTime(); // start time of the selected day
 			long diffInMinutesDefined = TimeUnit.MILLISECONDS.toMinutes(diffDefined); // start time in minutes
-			long diffInMinutesDefinedEnd = diffInMinutesDefined + 1439; // end time of the day
-			System.out.println(diffInMinutesDefined + "\t" + diffInMinutesDefinedEnd); // start and end time of this day
+			long diffInMinutesDefinedEnd = diffInMinutesDefined + 1439; // end time of the selected day
+			System.out.println(diffInMinutesDefined + "\t" + diffInMinutesDefinedEnd); // start and end time
 			
 			// output-file out of movements-array
 			PrintWriter output = new PrintWriter("data/patients.pov");
@@ -159,11 +160,11 @@ public class DAOTextfile implements DAO {
 					+ "[0 color rgb <1, 1, 1>]\n\t\t\t[1 color rgb <1, 2, 3>]\n\t\t}\n\t\tscale 2\n\t}\n}\n\n"
 					+ "//-----------------------------------------------------------------------\n"
 					+ "// patient --------------------------------------------------------------\n"
-					+ "#declare Patient =\nsphere {\n\t<1, 1, 1>, 3\n\ttexture {\n\t\tpigment {\n\t\t\t"
+					+ "#declare Patient =\nsphere {\n\t<1, 1, 1>, 2\n\ttexture {\n\t\tpigment {\n\t\t\t"
 					+ "color rgb <0, 1, 0>\n\t\t}\n\t\tfinish {\n\t\t\tambient 0.1\n\t\t\tdiffuse 0.85\n\t\t\t"
 					+ "phong 1\n\t\t}\n\t}\n}\n\n"
 					+ "//------------------------------------------------------------------------\n"
-					+ "// splines ---------------------------------------------------------------\n");
+					+ "// movements -------------------------------------------------------------\n");
 
 			// movements of each patient
 			for (int i = 0; i < movements.size(); i++) {
@@ -176,7 +177,9 @@ public class DAOTextfile implements DAO {
 
 					// new patient
 					if (movements.get(i).whereAmI().getID() == 0) { // _ENTRY_
-						output.print("#declare Spline" + spline + " =\nspline {\n\tlinear_spline\n");
+						output.print("// spline ----------------------------------------------------------------\n"
+								+ "#declare Spline" + spline + " =\nspline {\n\tlinear_spline\n");
+						first = diffInMinutes;
 						patientHasEntry = true;
 					}
 
@@ -203,19 +206,18 @@ public class DAOTextfile implements DAO {
 									+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
 									+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
 									+ movements.get(i).whereDoIGo().getzCoordinate() + ">\n" + "}\n");
-							spline++;
 							patientHasEntry = false;
+							
+							// generates the patient-objects for the output-file "patients.pov"
+							output.print("\n// generate patient ------------------------------------------------------\n"
+							+ "#if (clock >= " + first + " & clock <= " + diffInMinutes + ")\n\t"
+							+ "object {\n\t\tPatient\n\t\ttranslate Spline" + spline + "(clock)\n\t}\n#end\n\n");
+							
+							// increment spline
+							spline++;
 						}
 					}
 				}
-			}
-
-			// generates the patient-objects for the output-file "patients.pov"
-			output.print("\n//------------------------------------------------------------------------"
-					+ "\n// loop ------------------------------------------------------------------\n");
-
-			for (int i = 1; i < spline; i++) {
-				output.print("object {\n\tPatient\n\ttranslate Spline" + i + "(clock)" + "\n}\n");
 			}
 
 		} catch (FileNotFoundException e) {
