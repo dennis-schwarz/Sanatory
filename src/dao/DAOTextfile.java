@@ -30,8 +30,8 @@ public class DAOTextfile implements DAO {
 		return uniqueInstance;
 	}
 
-	public ArrayList<ArrayList> getAllData() {
-		// read "departments.txt"
+	public ArrayList<ArrayList> getAllData() {	
+	// read "departments.txt"
 		String csvFile = "data/departments.txt";
 		BufferedReader br = null;
 		String line = "";
@@ -82,7 +82,7 @@ public class DAOTextfile implements DAO {
 		Date firstDate = null;
 		Date lastDate = null;
 		boolean patientHasEntry = false;
-		long first = 0;
+		long firstAppear = 0;
 		
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
@@ -105,35 +105,36 @@ public class DAOTextfile implements DAO {
 				movements.add(movement);
 			}
 
-			// define first an last date of all "movements"
+			// define first an last date of all movements
 			firstDate = searchFirstDate(movements);
 			lastDate = searchLastDate(movements);
 			
-			// console-output
-			System.out.println("First Date:  " + firstDate + "\nLast Date:   " + lastDate);
+			// calculates the difference in minutes
 			long difference = lastDate.getTime() - firstDate.getTime();
 			long differenceInMinutes = TimeUnit.MILLISECONDS.toMinutes(difference);
-			System.out.println("\nDifference in minutes:  " + differenceInMinutes + "\n");
 			
-			// define only one day to show
-			Date definedDate = null;
-			try {
-				DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-				definedDate = df.parse("20120320000000"); // which day should be shown (20.03.2012)
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
+			// show only one day (i.e. 20.03.2012 00:00:00)
+			showOneDay(firstDate, "20120320000000");
 			
-			long diffDefined = definedDate.getTime() - firstDate.getTime(); // start time of the selected day
-			long diffInMinutesDefined = TimeUnit.MILLISECONDS.toMinutes(diffDefined); // start time in minutes
-			long diffInMinutesDefinedEnd = diffInMinutesDefined + 1439; // end time of the selected day
-			System.out.println(diffInMinutesDefined + "\t" + diffInMinutesDefinedEnd); // start and end time
+			// output-file for animation
+			PrintWriter animationOutput = new PrintWriter("data/patients.ini");
+			animationOutput.print("; Persistence Of Vision raytracer version 3.5 example file.\n"
+					+ "Antialias = On\n"
+					+ "Antialias_Threshold = 0.30\n"
+					+ "Antialias_Depth = 3/n"
+					+ "Input_File_Name = patients.pov\n"
+					+ "Initial_Frame = 1\n"
+					+ "Final_Frame = 1000\n"
+					+ "Initial_Clock = 0\n" // or showOneDay(firstDate, "20120320000000)
+					+ "Final_Clock = " + differenceInMinutes + ";total of minutes\n" // oneDay + 1439
+					+ "Cyclic_Animation = on\n"
+					+ "Pause_when_Done = off");
 			
 			// output-file out of movements-array
-			PrintWriter output = new PrintWriter("data/patients.pov");
-
+			PrintWriter moveOutput = new PrintWriter("data/patients.pov");
+			
 			// general information for the output-File "patients.pov"
-			output.print("//------------------------------------------------------------------------\n"
+			moveOutput.print("//------------------------------------------------------------------------\n"
 					+ "// POV-Ray 3.7 Scene File \"patients.pov\"\n// created by Manuel Huerbin, Dennis Schwarz and "
 					+ "Miriam Scholer, FHNW, 2015\n\n"
 					+ "//------------------------------------------------------------------------\n"
@@ -160,11 +161,11 @@ public class DAOTextfile implements DAO {
 					+ "[0 color rgb <1, 1, 1>]\n\t\t\t[1 color rgb <1, 2, 3>]\n\t\t}\n\t\tscale 2\n\t}\n}\n\n"
 					+ "//-----------------------------------------------------------------------\n"
 					+ "// patient --------------------------------------------------------------\n"
-					+ "#declare Patient =\nsphere {\n\t<1, 1, 1>, 2\n\ttexture {\n\t\tpigment {\n\t\t\t"
+					+ "#declare Patient =\nsphere {\n\t<1, 1, 1>, 1\n\ttexture {\n\t\tpigment {\n\t\t\t"
 					+ "color rgb <0, 1, 0>\n\t\t}\n\t\tfinish {\n\t\t\tambient 0.1\n\t\t\tdiffuse 0.85\n\t\t\t"
 					+ "phong 1\n\t\t}\n\t}\n}\n\n"
 					+ "//------------------------------------------------------------------------\n"
-					+ "// movements -------------------------------------------------------------\n");
+					+ "// movements -------------------------------------------------------------\n\n");
 
 			// movements of each patient
 			for (int i = 0; i < movements.size(); i++) {
@@ -177,40 +178,28 @@ public class DAOTextfile implements DAO {
 
 					// new patient
 					if (movements.get(i).whereAmI().getID() == 0) { // _ENTRY_
-						output.print("// spline ----------------------------------------------------------------\n"
+						moveOutput.print("// spline ----------------------------------------------------------------\n"
 								+ "#declare Spline" + spline + " =\nspline {\n\tlinear_spline\n");
-						first = diffInMinutes;
+						firstAppear = diffInMinutes;
 						patientHasEntry = true;
 					}
 
 					if (patientHasEntry == true) {
-						// calculates when the patient has to leave a station to arrive at the right time
-						diffInMinutes = calculateStart(diffInMinutes, movements.get(i).whereAmI().getxCoordinate(),
-								movements.get(i).whereAmI().getyCoordinate(),
-								movements.get(i).whereAmI().getzCoordinate(),
-								movements.get(i).whereDoIGo().getxCoordinate(),
-								movements.get(i).whereDoIGo().getyCoordinate(),
-								movements.get(i).whereDoIGo().getzCoordinate());
-
-						// as long as patients does not _EXIT_
+						// as long as patient does not _EXIT_
 						if (!(movements.get(i).whereDoIGo().getID() == 0)) {
 							// prints the coordinates of the next station
-							output.print("\t" + diffInMinutes + ", <"
+							moveOutput.print("\t" + diffInMinutes + ", <"
 									+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
 									+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
 									+ movements.get(i).whereDoIGo().getzCoordinate() + ">,\n");
-
+						
 						} else if (movements.get(i).whereDoIGo().getID() == 0) {
-							// prints the end coordinates and "}" at the end (_EXIT_) of each patient
-							output.print("\t" + diffInMinutes + ", <"
-									+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
-									+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
-									+ movements.get(i).whereDoIGo().getzCoordinate() + ">\n" + "}\n");
+							// patients exists
 							patientHasEntry = false;
 							
 							// generates the patient-objects for the output-file "patients.pov"
-							output.print("\n// generate patient ------------------------------------------------------\n"
-							+ "#if (clock >= " + first + " & clock <= " + diffInMinutes + ")\n\t"
+							moveOutput.print("}\n// generate patient ------------------------------------------------------\n"
+							+ "#if (clock > " + firstAppear + " & clock < " + diffInMinutes + ")\n\t"
 							+ "object {\n\t\tPatient\n\t\ttranslate Spline" + spline + "(clock)\n\t}\n#end\n\n");
 							
 							// increment spline
@@ -247,7 +236,7 @@ public class DAOTextfile implements DAO {
 	// check if department exists
 	public Department checkDepartment(String details) {
 		int ID = 0;
-		Department department = new Department(ID, 92.0, 183.0, 16.25, 0); // default end (emergency station)
+		Department department = new Department(ID, 0, 0, 0, 0);
 		boolean departmentExists = false;
 
 		try {
@@ -313,48 +302,21 @@ public class DAOTextfile implements DAO {
 		return lastDate;
 	}
 
-	// calculate, when the patient has to leave the station to arrive at the right time at next station (entry)
-	public long calculateStart(long diffInMinutes, double xStart, double yStart, double zStart,
-			double xEnd, double yEnd, double zEnd) {
-		double xWay;
-		double yWay;
-		double zWay;
-		double way;
+	// show one day
+	public long showOneDay(Date firstDate, String definedDate) {
 
-		// xWay to go
-		if (xStart > xEnd) {
-			xWay = xStart - xEnd;
-		} else {
-			xWay = xEnd - xStart;
+		Date tempDate = null;
+		try {
+			DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+			tempDate = df.parse(definedDate); // which day should be shown (i.e. 20120320000000)
+		} catch (ParseException e) {
+			e.printStackTrace();
 		}
 
-		// yWay to go
-		if (yStart > yEnd) {
-			yWay = yStart - yEnd;
-		} else {
-			yWay = yEnd - yStart;
-		}
+		long diffDefined = tempDate.getTime() - firstDate.getTime(); // start time of the selected day
+		long diffInMinutesDefined = TimeUnit.MILLISECONDS.toMinutes(diffDefined); // start time in minutes
 
-		// zWay to go
-		if (zStart > zEnd) {
-			zWay = zStart - zEnd;
-		} else {
-			zWay = zEnd - zStart;
-		}
-
-		// way to go
-		way = xWay + yWay + zWay;
-
-		/*
-		 *  "time", when patient has to leave to arrive at the right time
-		 *  
-		 *  x-Achsen-Abstand vom Anfang bis zum Ende des USB = 320 x-Koordinatenpunkte
-		 *  Zeit: 10 min
-		 *  = 0.03125 min / Koordinatepunkt  
-		 */
-		diffInMinutes = (long) (diffInMinutes - (way * 0.03125));
-
-		return diffInMinutes;
+		return diffInMinutesDefined;
 	}
 
 }
