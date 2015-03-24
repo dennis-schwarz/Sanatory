@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
 import model.Department;
 import model.Movement;
 
@@ -30,8 +31,9 @@ public class DAOTextfile implements DAO {
 		return uniqueInstance;
 	}
 
+	@SuppressWarnings("deprecation")
 	public ArrayList<ArrayList> getAllData() {	
-	// read "departments.txt"
+		// read "departments.txt"
 		String csvFile = "data/departments.txt";
 		BufferedReader br = null;
 		String line = "";
@@ -75,6 +77,7 @@ public class DAOTextfile implements DAO {
 		 * defines first and last date and generates output-file "patients.pov"
 		 */
 		csvFile = "data/movements.txt";
+		br = null;
 		Department from = null;
 		Department to = null;
 		Date entry = null;
@@ -109,26 +112,17 @@ public class DAOTextfile implements DAO {
 			firstDate = searchFirstDate(movements);
 			lastDate = searchLastDate(movements);
 			
+			// set beginning to midnight
+			firstDate.setHours(00);
+			firstDate.setMinutes(00);
+			firstDate.setSeconds(00);
+			
 			// calculates the difference in minutes
 			long difference = lastDate.getTime() - firstDate.getTime();
 			long differenceInMinutes = TimeUnit.MILLISECONDS.toMinutes(difference);
 			
 			// show only one day (i.e. 20.03.2012 00:00:00)
 			showOneDay(firstDate, "20120320000000");
-			
-			// output-file for animation
-			PrintWriter animationOutput = new PrintWriter("data/patients.ini");
-			animationOutput.print("; Persistence Of Vision raytracer version 3.5 example file.\n"
-					+ "Antialias = On\n"
-					+ "Antialias_Threshold = 0.30\n"
-					+ "Antialias_Depth = 3/n"
-					+ "Input_File_Name = patients.pov\n"
-					+ "Initial_Frame = 1\n"
-					+ "Final_Frame = 1000\n"
-					+ "Initial_Clock = 0\n" // or showOneDay(firstDate, "20120320000000)
-					+ "Final_Clock = " + differenceInMinutes + ";total of minutes\n" // oneDay + 1439
-					+ "Cyclic_Animation = on\n"
-					+ "Pause_when_Done = off");
 			
 			// output-file out of movements-array
 			PrintWriter moveOutput = new PrintWriter("data/patients.pov");
@@ -208,6 +202,20 @@ public class DAOTextfile implements DAO {
 					}
 				}
 			}
+			
+			// output-file for animation
+			PrintWriter animationOutput = new PrintWriter("data/patients.ini");
+			animationOutput.print(";Persistence Of Vision raytracer version 3.5 example file.\n"
+					+ "Antialias = On\n"
+					+ "Antialias_Threshold = 0.30\n"
+					+ "Antialias_Depth = 3/n"
+					+ "Input_File_Name = patients.pov\n"
+					+ "Initial_Frame = 1\n"
+					+ "Final_Frame = 1000\n"
+					+ "Initial_Clock = 0\n" // or showOneDay(firstDate, "20120320000000)
+					+ "Final_Clock = " + differenceInMinutes + ";total of minutes\n" // oneDay + 1439
+					+ "Cyclic_Animation = on\n"
+					+ "Pause_when_Done = off");
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
