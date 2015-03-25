@@ -112,11 +112,14 @@ public class DAOTextfile implements DAO {
 			firstDate = searchFirstDate(movements);
 			lastDate = searchLastDate(movements);
 			
-			// set beginning to midnight
+			// set firstDate and lastDate to midnight
 			firstDate.setHours(00);
 			firstDate.setMinutes(00);
 			firstDate.setSeconds(00);
-			
+			lastDate.setHours(23);
+			lastDate.setMinutes(59);
+			lastDate.setSeconds(59);
+
 			// calculates the difference in minutes
 			long difference = lastDate.getTime() - firstDate.getTime();
 			long differenceInMinutes = TimeUnit.MILLISECONDS.toMinutes(difference);
