@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import model.Department;
 import model.Movement;
 
-@SuppressWarnings({ "rawtypes", "resource" })
+@SuppressWarnings({ "rawtypes" })
 public class DAOTextfile implements DAO {
 	// declaration and initialization
 	private static DAOTextfile uniqueInstance = null;
@@ -123,12 +123,15 @@ public class DAOTextfile implements DAO {
 			// calculates the difference in minutes
 			long difference = lastDate.getTime() - firstDate.getTime();
 			long differenceInMinutes = TimeUnit.MILLISECONDS.toMinutes(difference);
+			System.out.println(firstDate + "\t\t" + lastDate);
+			System.out.println(differenceInMinutes);
 			
 			// show only one day (i.e. 20.03.2012 00:00:00)
 			showOneDay(firstDate, "20120320000000");
 			
 			// output-file out of movements-array
 			PrintWriter moveOutput = new PrintWriter("data/patients.pov");
+			boolean exit = false;
 			
 			// general information for the output-File "patients.pov"
 			moveOutput.print("//------------------------------------------------------------------------\n"
@@ -166,6 +169,12 @@ public class DAOTextfile implements DAO {
 
 			// movements of each patient
 			for (int i = 0; i < movements.size(); i++) {
+				
+				// if whereAmI does not exist and patient exits
+				if (movements.get(i).whereAmI() == null && movements.get(i).whereDoIGo().getID() == 0) {
+					exit = true;
+				}
+				
 				// department exists
 				if (!(movements.get(i).whereAmI() == null || movements.get(i)
 						.whereDoIGo() == null)) {
@@ -189,8 +198,8 @@ public class DAOTextfile implements DAO {
 									+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
 									+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
 									+ movements.get(i).whereDoIGo().getzCoordinate() + ">,\n");
-						
-						} else if (movements.get(i).whereDoIGo().getID() == 0) {
+							
+						} else if (movements.get(i).whereDoIGo().getID() == 0 || exit) {
 							// patients exists
 							patientHasEntry = false;
 							
@@ -205,13 +214,15 @@ public class DAOTextfile implements DAO {
 					}
 				}
 			}
+
+			moveOutput.close();
 			
 			// output-file for animation
 			PrintWriter animationOutput = new PrintWriter("data/patients.ini");
 			animationOutput.print(";Persistence Of Vision raytracer version 3.5 example file.\n"
 					+ "Antialias = On\n"
 					+ "Antialias_Threshold = 0.30\n"
-					+ "Antialias_Depth = 3/n"
+					+ "Antialias_Depth = 3\n"
 					+ "Input_File_Name = patients.pov\n"
 					+ "Initial_Frame = 1\n"
 					+ "Final_Frame = 1000\n"
@@ -219,6 +230,8 @@ public class DAOTextfile implements DAO {
 					+ "Final_Clock = " + differenceInMinutes + ";total of minutes\n" // oneDay + 1439
 					+ "Cyclic_Animation = on\n"
 					+ "Pause_when_Done = off");
+			
+			animationOutput.close();
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
