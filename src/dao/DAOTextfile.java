@@ -196,7 +196,7 @@ public class DAOTextfile implements DAO {
 				
 					// patient-movement if patient only moves to departments that does not exist	
 					} else if (patientMoves == false) {
-						moveOutput.print("\t\t-1, <0, 0, 0>,\n");
+						moveOutput.print("\t\t-1, <92, 183, 16.25>,\n");
 					}
 					
 					// _EXIT_
