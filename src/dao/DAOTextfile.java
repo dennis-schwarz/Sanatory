@@ -11,7 +11,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-
 import model.Department;
 import model.Movement;
 
@@ -33,11 +32,12 @@ public class DAOTextfile implements DAO {
 
 	@SuppressWarnings("deprecation")
 	public ArrayList<ArrayList> getAllData() {	
-		// read "departments.txt"
-		String csvFile = "data/departments.txt";
 		BufferedReader br = null;
 		String line = "";
 		String cvsSplitBy = "\t";
+		
+		// read "departments.txt"
+		String csvFile = "data/departments.txt";
 
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
@@ -74,7 +74,7 @@ public class DAOTextfile implements DAO {
 		/*
 		 * read "movements.txt"
 		 * 
-		 * defines first and last date and generates output-file "patients.pov"
+		 * defines first and last date and generates output-files "patients.pov" and "patients.ini"
 		 */
 		csvFile = "data/movements.txt";
 		br = null;
@@ -84,8 +84,10 @@ public class DAOTextfile implements DAO {
 		int type = 0;
 		Date firstDate = null;
 		Date lastDate = null;
-		boolean patientHasEntry = false;
-		long firstAppear = 0;
+		boolean patientEntry = false; // patient has entry
+		long firstEntry = 0; // entry-time of a patient
+		boolean patientIsInHospital = false; // patient is currently in the hospital
+		boolean patientMoves = false; // patient moves to departments that exist
 		
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
@@ -123,17 +125,11 @@ public class DAOTextfile implements DAO {
 			// calculates the difference in minutes
 			long difference = lastDate.getTime() - firstDate.getTime();
 			long differenceInMinutes = TimeUnit.MILLISECONDS.toMinutes(difference);
-			System.out.println(firstDate + "\t\t" + lastDate);
-			System.out.println(differenceInMinutes);
 			
-			// show only one day (i.e. 20.03.2012 00:00:00)
-			showOneDay(firstDate, "20120320000000");
-			
-			// output-file out of movements-array
+			// POVRay output-File out of movements-array
 			PrintWriter moveOutput = new PrintWriter("data/patients.pov");
-			boolean exit = false;
 			
-			// general information for the output-File "patients.pov"
+			// general information for the POVRay output-File "patients.pov"
 			moveOutput.print("//------------------------------------------------------------------------\n"
 					+ "// POV-Ray 3.7 Scene File \"patients.pov\"\n// created by Manuel Huerbin, Dennis Schwarz and "
 					+ "Miriam Scholer, FHNW, 2015\n\n"
@@ -166,58 +162,58 @@ public class DAOTextfile implements DAO {
 					+ "phong 1\n\t\t}\n\t}\n}\n\n"
 					+ "//------------------------------------------------------------------------\n"
 					+ "// movements -------------------------------------------------------------\n\n");
-
-			// movements of each patient
+			
+			// movements
 			for (int i = 0; i < movements.size(); i++) {
+				Date currentDate = movements.get(i).whenDoIStart();
+				long diff = currentDate.getTime() - firstDate.getTime(); // time to "arrive" (_ENTRY_)
+				long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diff); // arriving-time in minutes
 				
-				// if whereAmI does not exist and patient exits
-				if (movements.get(i).whereAmI() == null && movements.get(i).whereDoIGo().getID() == 0) {
-					exit = true;
+				// _ENTRY_
+				if (movements.get(i).whereAmI() != null && movements.get(i).whereAmI().getID() == 0) {
+					patientEntry = true;
+					firstEntry = diffInMinutes;
+					patientIsInHospital = true;					
 				}
-				
-				// department exists
-				if (!(movements.get(i).whereAmI() == null || movements.get(i)
-						.whereDoIGo() == null)) {
-					Date currentDate = movements.get(i).whenDoIStart();
-					long diff = currentDate.getTime() - firstDate.getTime(); // time to "arrive" (_ENTRY_)
-					long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diff); // time in minutes
-
-					// new patient
-					if (movements.get(i).whereAmI().getID() == 0) { // _ENTRY_
+			
+				// movements
+				if (patientIsInHospital) {
+					
+					// _ENTRY_-header
+					if (patientEntry) {
 						moveOutput.print("// spline ----------------------------------------------------------------\n"
 								+ "#declare Spline" + spline + " =\nspline {\n\tlinear_spline\n");
-						firstAppear = diffInMinutes;
-						patientHasEntry = true;
+						patientEntry = false;	
 					}
-
-					if (patientHasEntry == true) {
-						// as long as patient does not _EXIT_
-						if (!(movements.get(i).whereDoIGo().getID() == 0)) {
-							// prints the coordinates of the next station
-							moveOutput.print("\t" + diffInMinutes + ", <"
-									+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
-									+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
-									+ movements.get(i).whereDoIGo().getzCoordinate() + ">,\n");
-							
-						} else if (movements.get(i).whereDoIGo().getID() == 0 || exit) {
-							// patients exists
-							patientHasEntry = false;
-							
-							// generates the patient-objects for the output-file "patients.pov"
-							moveOutput.print("}\n// generate patient ------------------------------------------------------\n"
-							+ "#if (clock > " + firstAppear + " & clock < " + diffInMinutes + ")\n\t"
-							+ "object {\n\t\tPatient\n\t\ttranslate Spline" + spline + "(clock)\n\t}\n#end\n\n");
-							
-							// increment spline
-							spline++;
-						}
+					
+					// patient-movements
+					if (movements.get(i).whereDoIGo() != null && movements.get(i).whereDoIGo().getID() != 0) {
+						moveOutput.print("\t" + diffInMinutes + ", <"
+								+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
+								+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
+								+ movements.get(i).whereDoIGo().getzCoordinate() + ">,\n");
+						patientMoves = true;
+				
+					// patient-movement if patient only moves to departments that does not exist	
+					} else if (patientMoves == false) {
+						moveOutput.print("\t\t-1, <0, 0, 0>,\n");
+					}
+					
+					// _EXIT_
+					if (movements.get(i).whereDoIGo() != null && movements.get(i).whereDoIGo().getID() == 0) {
+						moveOutput.print("}\n// generate patient ------------------------------------------------------\n"
+								+ "#if (clock > " + firstEntry + " & clock < " + diffInMinutes + ")\n\t"
+								+ "object {\n\t\tPatient\n\t\ttranslate Spline" + spline + "(clock)\n\t}\n#end\n\n");
+						patientIsInHospital = false;
+						patientMoves = false;
+						spline++;
 					}
 				}
-			}
+			}	
 
 			moveOutput.close();
 			
-			// output-file for animation
+			// POVRay output-File "patients.ini" for the animation
 			PrintWriter animationOutput = new PrintWriter("data/patients.ini");
 			animationOutput.print(";Persistence Of Vision raytracer version 3.5 example file.\n"
 					+ "Antialias = On\n"
@@ -226,8 +222,8 @@ public class DAOTextfile implements DAO {
 					+ "Input_File_Name = patients.pov\n"
 					+ "Initial_Frame = 1\n"
 					+ "Final_Frame = 1000\n"
-					+ "Initial_Clock = 0\n" // or showOneDay(firstDate, "20120320000000)
-					+ "Final_Clock = " + differenceInMinutes + ";total of minutes\n" // oneDay + 1439
+					+ "Initial_Clock = 0\n" // or "showOneDay(firstDate, "20120320000000")"
+					+ "Final_Clock = " + differenceInMinutes + ";total of minutes\n" // and "oneDay + 1439"
 					+ "Cyclic_Animation = on\n"
 					+ "Pause_when_Done = off");
 			
@@ -332,13 +328,13 @@ public class DAOTextfile implements DAO {
 		Date tempDate = null;
 		try {
 			DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-			tempDate = df.parse(definedDate); // which day should be shown (i.e. 20120320000000)
+			tempDate = df.parse(definedDate); // which day should be shown (i.e. "20120320000000")
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 
 		long diffDefined = tempDate.getTime() - firstDate.getTime(); // start time of the selected day
-		long diffInMinutesDefined = TimeUnit.MILLISECONDS.toMinutes(diffDefined); // start time in minutes
+		long diffInMinutesDefined = TimeUnit.MILLISECONDS.toMinutes(diffDefined); // this start time in minutes
 
 		return diffInMinutesDefined;
 	}
