@@ -157,7 +157,7 @@ public class DAOTextfile implements DAO {
 					+ "[0 color rgb <1, 1, 1>]\n\t\t\t[1 color rgb <1, 2, 3>]\n\t\t}\n\t\tscale 2\n\t}\n}\n\n"
 					+ "//-----------------------------------------------------------------------\n"
 					+ "// patient --------------------------------------------------------------\n"
-					+ "#declare Patient =\nsphere {\n\t<1, 1, 1>, 1\n\ttexture {\n\t\tpigment {\n\t\t\t"
+					+ "#declare Patient =\nsphere {\n\t<1, 1, 1>, 2\n\ttexture {\n\t\tpigment {\n\t\t\t"
 					+ "color rgb <0, 1, 0>\n\t\t}\n\t\tfinish {\n\t\t\tambient 0.1\n\t\t\tdiffuse 0.85\n\t\t\t"
 					+ "phong 1\n\t\t}\n\t}\n}\n\n"
 					+ "//------------------------------------------------------------------------\n"
