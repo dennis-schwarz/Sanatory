@@ -222,7 +222,7 @@ public class DAOTextfile implements DAO {
 					+ "Input_File_Name = patients.pov\n"
 					+ "Initial_Frame = 1\n"
 					+ "Final_Frame = 1000\n"
-					+ "Initial_Clock = 0\n" // or "showOneDay(firstDate, "20120320000000")"
+					+ "Initial_Clock = 0\n" // or + showOneDay(firstDate, "20120320000000") + "\n"
 					+ "Final_Clock = " + differenceInMinutes + ";total of minutes\n" // and "oneDay + 1439"
 					+ "Cyclic_Animation = on\n"
 					+ "Pause_when_Done = off");
