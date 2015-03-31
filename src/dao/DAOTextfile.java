@@ -131,8 +131,8 @@ public class DAOTextfile implements DAO {
 			
 			// general information for the POVRay output-File "patients.pov"
 			moveOutput.print("//------------------------------------------------------------------------\n"
-					+ "// POV-Ray 3.7 Scene File \"patients.pov\"\n// created by Manuel Huerbin, Dennis Schwarz and "
-					+ "Miriam Scholer, FHNW, 2015\n\n"
+					+ "// POV-Ray 3.7 Scene File \"patients.pov\"\n// created by Miriam Scholer, Dennis Schwarz and"
+					+ " Manuel Huerbin, FHNW, 2015\n\n"
 					+ "//------------------------------------------------------------------------\n"
 					+ "// general settings ------------------------------------------------------\n"
 					+ "#version 3.7;\nglobal_settings {\n\tassumed_gamma 1.0\n}\n"
@@ -161,7 +161,7 @@ public class DAOTextfile implements DAO {
 					+ "color rgb <0, 1, 0>\n\t\t}\n\t\tfinish {\n\t\t\tambient 0.1\n\t\t\tdiffuse 0.85\n\t\t\t"
 					+ "phong 1\n\t\t}\n\t}\n}\n\n"
 					+ "//------------------------------------------------------------------------\n"
-					+ "// movements -------------------------------------------------------------\n\n");
+					+ "// movements -------------------------------------------------------------");
 			
 			// movements
 			for (int i = 0; i < movements.size(); i++) {
@@ -181,17 +181,38 @@ public class DAOTextfile implements DAO {
 					
 					// _ENTRY_-header
 					if (patientEntry) {
-						moveOutput.print("// spline ----------------------------------------------------------------\n"
+						moveOutput.print("\n\n// spline ----------------------------------------------------------------\n"
 								+ "#declare Spline" + spline + " =\nspline {\n\tlinear_spline\n");
 						patientEntry = false;	
 					}
 					
 					// patient-movements
-					if (movements.get(i).whereDoIGo() != null && movements.get(i).whereDoIGo().getID() != 0) {
-						moveOutput.print("\t" + diffInMinutes + ", <"
+					if (movements.get(i).whereAmI() != null && movements.get(i).whereDoIGo() != null
+							&& movements.get(i).whereDoIGo().getID() != 0) {
+						
+						if (movements.get(i).whereAmI().getID() != 0) {
+							// time when patient has to leave the current station (method: calculateLeavingTime(...))
+							moveOutput.print(
+									"\t" + calculateLeavingTime(diffInMinutes, movements.get(i).whereAmI().getxCoordinate(), 
+											movements.get(i).whereAmI().getyCoordinate(),
+											movements.get(i).whereAmI().getzCoordinate(),
+											movements.get(i).whereDoIGo().getxCoordinate(),
+											movements.get(i).whereDoIGo().getyCoordinate(),
+											movements.get(i).whereDoIGo().getzCoordinate()) 
+									+ ", <"
+									+ movements.get(i).whereAmI().getxCoordinate() + ", "
+									+ movements.get(i).whereAmI().getyCoordinate() + ", "
+									+ movements.get(i).whereAmI().getzCoordinate() + ">,\n"
+							);
+						}
+						
+						moveOutput.print(
+								// when patient arrives at station
+								"\t" + diffInMinutes + ", <"
 								+ movements.get(i).whereDoIGo().getxCoordinate() + ", "
 								+ movements.get(i).whereDoIGo().getyCoordinate() + ", "
 								+ movements.get(i).whereDoIGo().getzCoordinate() + ">,\n");
+						
 						patientMoves = true;
 				
 					// patient-movement if patient only moves to departments that does not exist	
@@ -203,7 +224,7 @@ public class DAOTextfile implements DAO {
 					if (movements.get(i).whereDoIGo() != null && movements.get(i).whereDoIGo().getID() == 0) {
 						moveOutput.print("}\n// generate patient ------------------------------------------------------\n"
 								+ "#if (clock > " + firstEntry + " & clock < " + diffInMinutes + ")\n\t"
-								+ "object {\n\t\tPatient\n\t\ttranslate Spline" + spline + "(clock)\n\t}\n#end\n\n");
+								+ "object {\n\t\tPatient\n\t\ttranslate Spline" + spline + "(clock)\n\t}\n#end");
 						patientIsInHospital = false;
 						patientMoves = false;
 						spline++;
@@ -337,6 +358,52 @@ public class DAOTextfile implements DAO {
 		long diffInMinutesDefined = TimeUnit.MILLISECONDS.toMinutes(diffDefined); // this start time in minutes
 
 		return diffInMinutesDefined;
+	}
+	
+	// calculate the time, when a patient has to leave its station
+	public long calculateLeavingTime(long diffInMinutes, double currentXCoordinate, double currentYCoordinate,
+			double currentZCoordinate, double xDestination, double yDestination, double zDestination) {
+		
+		double xDistance = 0;
+		double yDistance = 0;
+		double zDistance = 0;
+		double totalDistance = 0;
+		
+		// distances between x, y and z
+		if (currentXCoordinate >= xDestination) {
+			xDistance = currentXCoordinate - xDestination;
+		
+		} else {
+			xDistance = xDestination - currentXCoordinate;
+		}
+		
+		if (currentYCoordinate >= yDestination) {
+			yDistance = currentYCoordinate - yDestination;
+		
+		} else {
+			yDistance = yDestination - currentYCoordinate;
+		}
+		
+		if (currentZCoordinate >= zDestination) {
+			zDistance = currentZCoordinate - zDestination;
+		
+		} else {
+			zDistance = zDestination - currentZCoordinate;
+		}
+
+		// squares
+		xDistance = xDistance * xDistance;
+		yDistance = yDistance * yDistance;
+		zDistance = zDistance * zDistance;
+		
+		// radical of total distance
+		totalDistance = xDistance + yDistance + zDistance;
+		totalDistance = Math.sqrt(totalDistance);
+		
+		// for each step in the coordinate system the patient needs to leave 0.0833 minutes (5 seconds) earlier
+		diffInMinutes = (long) (diffInMinutes - (totalDistance * 0.0833));		
+		
+		return diffInMinutes;
 	}
 
 }

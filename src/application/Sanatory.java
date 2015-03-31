@@ -8,7 +8,7 @@ public class Sanatory {
 
 	@SuppressWarnings("unused")
 	public Sanatory() {
-		final String version = "1";
+		final String version = "1.0";
 		ApplicationContext applicationContext = new ApplicationContext(version);
 		DAO sanatoryDao = new DAOTextfile();
 		sanatoryDao.getAllData();
