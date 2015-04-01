@@ -370,33 +370,16 @@ public class DAOTextfile implements DAO {
 		double totalDistance = 0;
 		
 		// distances between x, y and z
-		if (currentXCoordinate >= xDestination) {
-			xDistance = currentXCoordinate - xDestination;
-		
-		} else {
-			xDistance = xDestination - currentXCoordinate;
-		}
-		
-		if (currentYCoordinate >= yDestination) {
-			yDistance = currentYCoordinate - yDestination;
-		
-		} else {
-			yDistance = yDestination - currentYCoordinate;
-		}
-		
-		if (currentZCoordinate >= zDestination) {
-			zDistance = currentZCoordinate - zDestination;
-		
-		} else {
-			zDistance = zDestination - currentZCoordinate;
-		}
+		xDistance = currentXCoordinate - xDestination;
+		yDistance = currentYCoordinate - yDestination;
+		zDistance = currentZCoordinate - zDestination;
 
 		// squares
 		xDistance = xDistance * xDistance;
 		yDistance = yDistance * yDistance;
 		zDistance = zDistance * zDistance;
 		
-		// radical of total distance
+		// radical of total distance (vector)
 		totalDistance = xDistance + yDistance + zDistance;
 		totalDistance = Math.sqrt(totalDistance);
 		
