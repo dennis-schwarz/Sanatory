@@ -369,12 +369,37 @@ public class DAOTextfile implements DAO {
 		double zDistance = 0;
 		double totalDistance = 0;
 		
+		// calculate distance with only positive coordinates
+		if (currentXCoordinate < 0) {
+			currentXCoordinate = currentXCoordinate * -1;
+		}
+		
+		if (currentYCoordinate < 0) {
+			currentYCoordinate = currentYCoordinate * -1;
+		}
+		
+		if (currentZCoordinate < 0) {
+			currentZCoordinate = currentZCoordinate * -1;
+		}
+		
+		if (xDestination < 0) {
+			xDestination = xDestination * -1;
+		}
+		
+		if (yDestination < 0) {
+			yDestination = yDestination * -1;
+		}
+		
+		if (zDestination < 0) {
+			zDestination = zDestination * -1;
+		}
+		
 		// distances between x, y and z
 		xDistance = currentXCoordinate - xDestination;
 		yDistance = currentYCoordinate - yDestination;
 		zDistance = currentZCoordinate - zDestination;
 
-		// squares
+		// squares (result is positive)
 		xDistance = xDistance * xDistance;
 		yDistance = yDistance * yDistance;
 		zDistance = zDistance * zDistance;
