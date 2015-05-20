@@ -408,8 +408,8 @@ public class DAOTextfile implements DAO {
 		totalDistance = xDistance + yDistance + zDistance;
 		totalDistance = Math.sqrt(totalDistance);
 		
-		// for each step in the coordinate system the patient needs to leave 0.0833 minutes (5 seconds) earlier
-		diffInMinutes = (long) (diffInMinutes - (totalDistance * 0.0833));		
+		// for each step in the coordinate system the patient needs to leave 0.06 minutes (3.5 seconds) earlier
+		diffInMinutes = (long) (diffInMinutes - (totalDistance * 0.06));		
 		
 		return diffInMinutes;
 	}
