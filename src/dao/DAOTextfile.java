@@ -21,8 +21,8 @@ public class DAOTextfile implements DAO {
 	ArrayList<Department> departments = new ArrayList<Department>();
 	ArrayList<Movement> movements = new ArrayList<Movement>();
 	ArrayList<ArrayList> depMov = new ArrayList<ArrayList>();
-	int spline = 1;
-
+	int spline = 1;	
+	
 	public DAOTextfile getUniqueInstance() {
 		if (uniqueInstance == null) {
 			uniqueInstance = new DAOTextfile();
@@ -163,11 +163,17 @@ public class DAOTextfile implements DAO {
 					+ "//------------------------------------------------------------------------\n"
 					+ "// movements -------------------------------------------------------------");
 			
+			long diffInMinutes = 0;
+			long lastDiffInMinutes = 0;
+			
 			// movements
 			for (int i = 0; i < movements.size(); i++) {
+				
+				lastDiffInMinutes = diffInMinutes;
+				
 				Date currentDate = movements.get(i).whenDoIStart();
 				long diff = currentDate.getTime() - firstDate.getTime(); // time to "arrive" (_ENTRY_)
-				long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diff); // arriving-time in minutes
+				diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diff); // arriving-time in minutes
 				
 				// _ENTRY_
 				if (movements.get(i).whereAmI() != null && movements.get(i).whereAmI().getID() == 0) {
@@ -188,17 +194,19 @@ public class DAOTextfile implements DAO {
 					
 					// patient-movements
 					if (movements.get(i).whereAmI() != null && movements.get(i).whereDoIGo() != null
-							&& movements.get(i).whereDoIGo().getID() != 0) {
-						
-						if (movements.get(i).whereAmI().getID() != 0) {
+							&& movements.get(i).whereDoIGo().getID() != 0) { // patient is not leaving hospital
+												
+						if (movements.get(i).whereAmI().getID() != 0) { // when it is not the patient's entry
+							
 							// time when patient has to leave the current station (method: calculateLeavingTime(...))
+							// diffInMinutes is the time, when the patient has to arrive at a station
 							moveOutput.print(
 									"\t" + calculateLeavingTime(diffInMinutes, movements.get(i).whereAmI().getxCoordinate(), 
 											movements.get(i).whereAmI().getyCoordinate(),
 											movements.get(i).whereAmI().getzCoordinate(),
 											movements.get(i).whereDoIGo().getxCoordinate(),
 											movements.get(i).whereDoIGo().getyCoordinate(),
-											movements.get(i).whereDoIGo().getzCoordinate()) 
+											movements.get(i).whereDoIGo().getzCoordinate(), lastDiffInMinutes) 
 									+ ", <"
 									+ movements.get(i).whereAmI().getxCoordinate() + ", "
 									+ movements.get(i).whereAmI().getyCoordinate() + ", "
@@ -270,7 +278,7 @@ public class DAOTextfile implements DAO {
 
 		depMov.add(departments);
 		depMov.add(movements);
-
+		
 		return depMov;
 	}
 
@@ -362,7 +370,8 @@ public class DAOTextfile implements DAO {
 	
 	// calculate the time, when a patient has to leave its station
 	public long calculateLeavingTime(long diffInMinutes, double currentXCoordinate, double currentYCoordinate,
-			double currentZCoordinate, double xDestination, double yDestination, double zDestination) {
+			double currentZCoordinate, double xDestination, double yDestination, double zDestination,
+			long lastDiffInMinutes) {
 		
 		double xDistance = 0;
 		double yDistance = 0;
@@ -407,9 +416,13 @@ public class DAOTextfile implements DAO {
 		// radical of total distance (vector)
 		totalDistance = xDistance + yDistance + zDistance;
 		totalDistance = Math.sqrt(totalDistance);
-		
+
 		// for each step in the coordinate system the patient needs to leave 0.06 minutes (3.5 seconds) earlier
 		diffInMinutes = (long) (diffInMinutes - (totalDistance * 0.06));		
+
+		if (diffInMinutes < lastDiffInMinutes) {
+			diffInMinutes = lastDiffInMinutes;
+		}
 		
 		return diffInMinutes;
 	}
