@@ -223,7 +223,7 @@ public class DAOTextfile implements DAO {
 					// _EXIT_
 					if (movements.get(i).whereDoIGo() != null && movements.get(i).whereDoIGo().getID() == 0) {
 						moveOutput.print("}\n// generate patient ------------------------------------------------------\n"
-								+ "#if (clock > " + firstEntry + " & clock < " + diffInMinutes + ")\n\t"
+								+ "#if (clock >= " + firstEntry + " & clock < " + diffInMinutes + ")\n\t"
 								+ "object {\n\t\tPatient\n\t\ttranslate Spline" + spline + "(clock)\n\t}\n#end");
 						patientIsInHospital = false;
 						patientMoves = false;
