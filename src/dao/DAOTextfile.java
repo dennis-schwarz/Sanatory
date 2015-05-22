@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
 import model.Department;
 import model.Movement;
 
@@ -85,7 +86,7 @@ public class DAOTextfile implements DAO {
 		Date firstDate = null;
 		Date lastDate = null;
 		boolean patientEntry = false; // patient has entry
-		long firstEntry = 0; // entry-time of a patient
+		double firstEntry = 0; // entry-time of a patient
 		boolean patientIsInHospital = false; // patient is currently in the hospital
 		boolean patientMoves = false; // patient moves to departments that exist
 		
@@ -123,8 +124,9 @@ public class DAOTextfile implements DAO {
 			lastDate.setSeconds(59);
 
 			// calculates the difference in minutes
-			long difference = lastDate.getTime() - firstDate.getTime();
-			long differenceInMinutes = TimeUnit.MILLISECONDS.toMinutes(difference);
+			double difference = lastDate.getTime() - firstDate.getTime();
+			@SuppressWarnings("unused")
+			double differenceInMinutes = TimeUnit.MILLISECONDS.toMinutes((long)difference);
 			
 			// POVRay output-File out of movements-array
 			PrintWriter moveOutput = new PrintWriter("data/patients.pov");
@@ -163,8 +165,8 @@ public class DAOTextfile implements DAO {
 					+ "//------------------------------------------------------------------------\n"
 					+ "// movements -------------------------------------------------------------");
 			
-			long diffInMinutes = 0;
-			long lastDiffInMinutes = 0;
+			double diffInMinutes = 0;
+			double lastDiffInMinutes = 0;
 			
 			// movements
 			for (int i = 0; i < movements.size(); i++) {
@@ -251,8 +253,8 @@ public class DAOTextfile implements DAO {
 					+ "Input_File_Name = patients.pov\n"
 					+ "Initial_Frame = 1\n"
 					+ "Final_Frame = 1000\n"
-					+ "Initial_Clock = 0\n" // or + showOneDay(firstDate, "20120320000000") + "\n"
-					+ "Final_Clock = " + differenceInMinutes + ";total of minutes\n" // and "oneDay + 1439"
+					+ "Initial_Clock = " + showOneDay(firstDate, "20120712000000") + "\n" // show 12.07.2012 - 00:00:00
+					+ "Final_Clock = " + (showOneDay(firstDate, "20120712000000") + 2879) + "\n" // until 13.07.2012 - 23:59:59
 					+ "Cyclic_Animation = on\n"
 					+ "Pause_when_Done = off");
 			
@@ -369,39 +371,14 @@ public class DAOTextfile implements DAO {
 	}
 	
 	// calculate the time, when a patient has to leave its station
-	public long calculateLeavingTime(long diffInMinutes, double currentXCoordinate, double currentYCoordinate,
+	public double calculateLeavingTime(double diffInMinutes, double currentXCoordinate, double currentYCoordinate,
 			double currentZCoordinate, double xDestination, double yDestination, double zDestination,
-			long lastDiffInMinutes) {
+			double lastDiffInMinutes) {
 		
-		double xDistance = 0;
-		double yDistance = 0;
-		double zDistance = 0;
-		double totalDistance = 0;
-		
-		// calculate distance with only positive coordinates
-		if (currentXCoordinate < 0) {
-			currentXCoordinate = currentXCoordinate * -1;
-		}
-		
-		if (currentYCoordinate < 0) {
-			currentYCoordinate = currentYCoordinate * -1;
-		}
-		
-		if (currentZCoordinate < 0) {
-			currentZCoordinate = currentZCoordinate * -1;
-		}
-		
-		if (xDestination < 0) {
-			xDestination = xDestination * -1;
-		}
-		
-		if (yDestination < 0) {
-			yDestination = yDestination * -1;
-		}
-		
-		if (zDestination < 0) {
-			zDestination = zDestination * -1;
-		}
+		double xDistance = 0.0;
+		double yDistance = 0.0;
+		double zDistance = 0.0;
+		double totalDistance = 0.0;
 		
 		// distances between x, y and z
 		xDistance = currentXCoordinate - xDestination;
@@ -414,15 +391,25 @@ public class DAOTextfile implements DAO {
 		zDistance = zDistance * zDistance;
 		
 		// radical of total distance (vector)
-		totalDistance = xDistance + yDistance + zDistance;
+		totalDistance = xDistance + yDistance + zDistance;		
 		totalDistance = Math.sqrt(totalDistance);
 
-		// for each step in the coordinate system the patient needs to leave 0.06 minutes (3.5 seconds) earlier
-		diffInMinutes = (long) (diffInMinutes - (totalDistance * 0.06));		
-
+		// temp
+		//double diffInMinutesTemp = diffInMinutes;
+		
+		// for each step in the coordinate system the patient needs to leave 0.005 minutes earlier
+		diffInMinutes = diffInMinutes - (totalDistance * 0.005);		
+		
+		// catch all cases, that would leave the station before they arrive at this station (increases speed (92 cases))
 		if (diffInMinutes < lastDiffInMinutes) {
 			diffInMinutes = lastDiffInMinutes;
 		}
+		
+		// time difference (time for the way)
+		//double timeDifference = diffInMinutesTemp - diffInMinutes;
+
+		// speed
+		//double v = totalDistance / timeDifference;
 		
 		return diffInMinutes;
 	}
