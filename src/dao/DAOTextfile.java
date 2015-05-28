@@ -394,11 +394,13 @@ public class DAOTextfile implements DAO {
 		totalDistance = xDistance + yDistance + zDistance;		
 		totalDistance = Math.sqrt(totalDistance);
 
+		//System.out.print(totalDistance + "\t");
+		
 		// temp
 		//double diffInMinutesTemp = diffInMinutes;
 		
 		// for each step in the coordinate system the patient needs to leave 0.005 minutes earlier
-		diffInMinutes = diffInMinutes - (totalDistance * 0.005);		
+		diffInMinutes = diffInMinutes - (totalDistance * 0.5);		
 		
 		// catch all cases, that would leave the station before they arrive at this station (increases speed (92 cases))
 		if (diffInMinutes < lastDiffInMinutes) {
@@ -410,6 +412,13 @@ public class DAOTextfile implements DAO {
 
 		// speed
 		//double v = totalDistance / timeDifference;
+		
+		// to slow patients
+//		if (v < 1.9) {
+//			System.out.println(v);
+//		}
+		
+		//System.out.println(diffInMinutes);
 		
 		return diffInMinutes;
 	}
