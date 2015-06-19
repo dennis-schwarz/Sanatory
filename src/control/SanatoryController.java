@@ -170,6 +170,8 @@ public class SanatoryController {
 			}
 		}
 		
+		povWriter.close();
+		
 		iniWriter.writeOutput(";Persistence Of Vision raytracer version 3.5 example file.\n"
 				+ "Antialias = On\n"
 				+ "Antialias_Threshold = 0.30\n"
@@ -181,6 +183,7 @@ public class SanatoryController {
 				+ "Final_Clock = " + (showOneDay(firstDate, "20120712000000") + 2879) + "\n" // until 13.07.2012 - 23:59:59
 				+ "Cyclic_Animation = on\n"
 				+ "Pause_when_Done = off");
+		iniWriter.close();
 		depMov.add(departments);
 		depMov.add(movements);
 	}
