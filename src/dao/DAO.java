@@ -2,9 +2,10 @@ package dao;
 
 import java.util.ArrayList;
 
-@SuppressWarnings("rawtypes")
+import model.Department;
+import model.Movement;
+
 public interface DAO {
-
-	public ArrayList<ArrayList> getAllData();
-
+	public ArrayList<Department> getAllDepartments();
+	public ArrayList<Movement> getAllMovements();
 }

@@ -1,16 +1,15 @@
 package application;
 
-import dao.DAO;
-import dao.DAOTextfile;
-import application.ApplicationContext;
+import control.SanatoryController;
 
 public class Sanatory {
+	private ApplicationContext applicationContext;
+	private SanatoryController sanatoryController;
 
 	public Sanatory() {
-		final String version = "1.0";
-		ApplicationContext applicationContext = new ApplicationContext(version);
-		DAO sanatoryDao = new DAOTextfile(applicationContext);
-		sanatoryDao.getAllData();
+		this.applicationContext = new ApplicationContext();
+		this.sanatoryController = new SanatoryController(applicationContext);
+		sanatoryController.ProcessInput();
 	}
 
 	public static void main(String[] args) {
