@@ -6,7 +6,6 @@ import application.ApplicationContext;
 
 public class Sanatory {
 
-	@SuppressWarnings("unused")
 	public Sanatory() {
 		final String version = "1.0";
 		ApplicationContext applicationContext = new ApplicationContext(version);
