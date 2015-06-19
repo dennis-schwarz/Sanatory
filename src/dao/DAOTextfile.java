@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import application.ApplicationContext;
 import model.Department;
 import model.Movement;
 
@@ -22,28 +23,33 @@ public class DAOTextfile implements DAO {
 	ArrayList<Department> departments = new ArrayList<Department>();
 	ArrayList<Movement> movements = new ArrayList<Movement>();
 	ArrayList<ArrayList> depMov = new ArrayList<ArrayList>();
-	int spline = 1;	
+	int spline = 1;
+	private ApplicationContext applicationContext;
 	
-	public DAOTextfile getUniqueInstance() {
+	public DAOTextfile(ApplicationContext applicationContext){
+		this.applicationContext = applicationContext;
+	}
+	
+	// Make sure only one Instance of DAOTextfile can get initiated
+	public DAOTextfile getUniqueInstance(ApplicationContext applicationContext) {
 		if (uniqueInstance == null) {
-			uniqueInstance = new DAOTextfile();
+			uniqueInstance = new DAOTextfile(applicationContext);
 		}
 		return uniqueInstance;
 	}
 
-	@SuppressWarnings("deprecation")
-	public ArrayList<ArrayList> getAllData() {	
+	@SuppressWarnings("finally")
+	public ArrayList<Department> getAllDepartments(){
 		BufferedReader br = null;
 		String line = "";
 		String cvsSplitBy = "\t";
-		
-		// read "departments.txt"
-		String csvFile = "data/departments.txt";
 
 		try {
-			br = new BufferedReader(new FileReader(csvFile));
+			// Read Departments from csv-File
+			br = new BufferedReader(new FileReader(applicationContext.getDepartmentsFile()));
 			line = br.readLine(); // skip first line (title)
 
+			// Read csv-File line by line and create department object with properties
 			while ((line = br.readLine()) != null) {
 				String[] details = line.split(cvsSplitBy);
 				Department department = new Department(
@@ -60,7 +66,8 @@ public class DAOTextfile implements DAO {
 
 		} catch (IOException e) {
 			e.printStackTrace();
-
+		
+		// Close Buffered Reader after import
 		} finally {
 			if (br != null) {
 
@@ -70,28 +77,22 @@ public class DAOTextfile implements DAO {
 					e.printStackTrace();
 				}
 			}
+			return departments;
 		}
-
-		/*
-		 * read "movements.txt"
-		 * 
-		 * defines first and last date and generates output-files "patients.pov" and "patients.ini"
-		 */
-		csvFile = "data/movements.txt";
-		br = null;
+	}
+	
+	@SuppressWarnings("finally")
+	public ArrayList<Movement> getAllMovements(){
+		BufferedReader br = null;
+		String line = "";
+		String cvsSplitBy = "\t";
 		Department from = null;
 		Department to = null;
 		Date entry = null;
 		int type = 0;
-		Date firstDate = null;
-		Date lastDate = null;
-		boolean patientEntry = false; // patient has entry
-		double firstEntry = 0; // entry-time of a patient
-		boolean patientIsInHospital = false; // patient is currently in the hospital
-		boolean patientMoves = false; // patient moves to departments that exist
 		
 		try {
-			br = new BufferedReader(new FileReader(csvFile));
+			br = new BufferedReader(new FileReader(applicationContext.getMovementsFile()));
 			line = br.readLine(); // skip first line (title)
 
 			while ((line = br.readLine()) != null) {
@@ -110,27 +111,61 @@ public class DAOTextfile implements DAO {
 				Movement movement = new Movement(from, to, entry, type);
 				movements.add(movement);
 			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 
-			// define first an last date of all movements
-			firstDate = searchFirstDate(movements);
-			lastDate = searchLastDate(movements);
-			
-			// set firstDate and lastDate to midnight
-			firstDate.setHours(00);
-			firstDate.setMinutes(00);
-			firstDate.setSeconds(00);
-			lastDate.setHours(23);
-			lastDate.setMinutes(59);
-			lastDate.setSeconds(59);
+		} catch (IOException e) {
+			e.printStackTrace();
 
-			// calculates the difference in minutes
-			double difference = lastDate.getTime() - firstDate.getTime();
-			@SuppressWarnings("unused")
-			double differenceInMinutes = TimeUnit.MILLISECONDS.toMinutes((long)difference);
+		} finally {
+
+			if (br != null) {
+				try {
+					br.close();
+
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 			
-			// POVRay output-File out of movements-array
-			PrintWriter moveOutput = new PrintWriter("data/patients.pov");
-			
+			return movements;
+		}
+	}
+	
+	// Read departments and movements and create output-File (patients.pov)
+	@SuppressWarnings("deprecation")
+	public ArrayList<ArrayList> getAllData() {	
+		ArrayList<Department> departments = getAllDepartments();
+		ArrayList<Movement> movements = getAllMovements();
+		Date firstDate = null;
+		Date lastDate = null;
+		boolean patientEntry = false; // patient has entry
+		double firstEntry = 0; // entry-time of a patient
+		boolean patientIsInHospital = false; // patient is currently in the hospital
+		boolean patientMoves = false; // patient moves to departments that exist
+		
+
+		// define first an last date of all movements
+		firstDate = searchFirstDate(movements);
+		lastDate = searchLastDate(movements);
+		
+		// set firstDate and lastDate to midnight
+		firstDate.setHours(00);
+		firstDate.setMinutes(00);
+		firstDate.setSeconds(00);
+		lastDate.setHours(23);
+		lastDate.setMinutes(59);
+		lastDate.setSeconds(59);
+
+		// calculates the difference in minutes
+		double difference = lastDate.getTime() - firstDate.getTime();
+		@SuppressWarnings("unused")
+		double differenceInMinutes = TimeUnit.MILLISECONDS.toMinutes((long)difference);
+		
+		// POVRay output-File out of movements-array
+		PrintWriter moveOutput;
+		try {
+			moveOutput = new PrintWriter("data/patients.pov");
 			// general information for the POVRay output-File "patients.pov"
 			moveOutput.print("//------------------------------------------------------------------------\n"
 					+ "// POV-Ray 3.7 Scene File \"patients.pov\"\n// created by Miriam Scholer, Dennis Schwarz and"
@@ -243,9 +278,17 @@ public class DAOTextfile implements DAO {
 			}	
 
 			moveOutput.close();
-			
-			// POVRay output-File "patients.ini" for the animation
-			PrintWriter animationOutput = new PrintWriter("data/patients.ini");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		// POVRay output-File "patients.ini" for the animation
+		PrintWriter animationOutput;
+		try {
+			animationOutput = new PrintWriter("data/patients.ini");
 			animationOutput.print(";Persistence Of Vision raytracer version 3.5 example file.\n"
 					+ "Antialias = On\n"
 					+ "Antialias_Threshold = 0.30\n"
@@ -259,28 +302,13 @@ public class DAOTextfile implements DAO {
 					+ "Pause_when_Done = off");
 			
 			animationOutput.close();
-
 		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-
-		} catch (IOException e) {
-			e.printStackTrace();
-
-		} finally {
-
-			if (br != null) {
-				try {
-					br.close();
-
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 
 		depMov.add(departments);
 		depMov.add(movements);
-		
 		return depMov;
 	}
 

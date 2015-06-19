@@ -10,7 +10,7 @@ public class Sanatory {
 	public Sanatory() {
 		final String version = "1.0";
 		ApplicationContext applicationContext = new ApplicationContext(version);
-		DAO sanatoryDao = new DAOTextfile();
+		DAO sanatoryDao = new DAOTextfile(applicationContext);
 		sanatoryDao.getAllData();
 	}
 
