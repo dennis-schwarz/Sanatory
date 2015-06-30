@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -43,20 +44,29 @@ public class SanatoryController {
 		this.movements = sanatoryDao.getAllMovements();
 	}
 
-	@SuppressWarnings("deprecation")
 	public void ProcessInput() {
 		// define first an last date of all movements
 		firstDate = searchFirstDate(movements);
 		lastDate = searchLastDate(movements);
 
+		// convert to calendar-format
+		Calendar firstCal = Calendar.getInstance();
+		firstCal.setTime(firstDate);
+		Calendar lastCal = Calendar.getInstance();
+		lastCal.setTime(lastDate);
+		
 		// set firstDate and lastDate to midnight
-		firstDate.setHours(00);
-		firstDate.setMinutes(00);
-		firstDate.setSeconds(00);
-		lastDate.setHours(23);
-		lastDate.setMinutes(59);
-		lastDate.setSeconds(59);
-
+		firstCal.set(Calendar.HOUR_OF_DAY, 00);		
+		firstCal.set(Calendar.MINUTE, 00);
+		firstCal.set(Calendar.SECOND, 00);
+		lastCal.set(Calendar.HOUR_OF_DAY, 23);		
+		lastCal.set(Calendar.MINUTE, 59);
+		lastCal.set(Calendar.SECOND, 59);
+	
+		// convert back to date-format (for calculation)
+		firstDate = firstCal.getTime(); 
+		lastDate = lastCal.getTime();		
+		
 		// calculates the difference in minutes
 		double difference = lastDate.getTime() - firstDate.getTime();
 		@SuppressWarnings("unused")
