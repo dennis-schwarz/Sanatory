@@ -54,19 +54,19 @@ public class SanatoryController {
 		firstCal.setTime(firstDate);
 		Calendar lastCal = Calendar.getInstance();
 		lastCal.setTime(lastDate);
-		
+
 		// set firstDate and lastDate to midnight
-		firstCal.set(Calendar.HOUR_OF_DAY, 00);		
+		firstCal.set(Calendar.HOUR_OF_DAY, 00);
 		firstCal.set(Calendar.MINUTE, 00);
 		firstCal.set(Calendar.SECOND, 00);
-		lastCal.set(Calendar.HOUR_OF_DAY, 23);		
+		lastCal.set(Calendar.HOUR_OF_DAY, 23);
 		lastCal.set(Calendar.MINUTE, 59);
 		lastCal.set(Calendar.SECOND, 59);
-	
+
 		// convert back to date-format (for calculation)
-		firstDate = firstCal.getTime(); 
-		lastDate = lastCal.getTime();		
-		
+		firstDate = firstCal.getTime();
+		lastDate = lastCal.getTime();
+
 		// calculates the difference in minutes
 		double difference = lastDate.getTime() - firstDate.getTime();
 		@SuppressWarnings("unused")
@@ -79,8 +79,9 @@ public class SanatoryController {
 						+ " Manuel Huerbin, FHNW, 2015\n\n"
 						+ "//------------------------------------------------------------------------\n"
 						+ "// general settings ------------------------------------------------------\n"
-						+ "#version 3.7;\nglobal_settings {\n\tassumed_gamma 1.0\n}\n"
-						+ "#include \"colors.inc\"\n#include \"textures.inc\"\n#include \"math.inc\"\n#include "
+						+ "#version 3.7;\nglobal_settings {\n\tassumed_gamma 1.0\n}\n\n"
+						+ "#include \"colors.inc\"\n#include \"textures.inc\"\n#include \"functions.inc\""
+						+ "\n#include \"math.inc\"\n#include "
 						+ "\"transforms.inc\"\n#include \"usb.pov\" //usb-model (transparent)\n"
 						+ "\n//------------------------------------------------------------------------\n"
 						+ "// camera ----------------------------------------------------------------\n"
@@ -99,8 +100,59 @@ public class SanatoryController {
 						+ "// sky -------------------------------------------------------------------\n"
 						+ "sky_sphere {\n\tpigment {\n\t\tgradient <0, 0, 0>\n\t\tcolor_map {\n\t\t\t"
 						+ "[0 color rgb <1, 1, 1>]\n\t\t\t[1 color rgb <1, 2, 3>]\n\t\t}\n\t\tscale 2\n\t}\n}\n\n"
-						+ "//-----------------------------------------------------------------------\n"
-						+ "// patient --------------------------------------------------------------\n"
+						+ "//------------------------------------------------------------------------\n"
+						+ "// clock - textures ------------------------------------------------------\n"
+						+ "#declare Frame_Texture =\n\ttexture {\n\t\tpigment {\n\t\t\tcolor rgb <1.0, 1, 1> * 0.1\n\t\t}\n"
+						+ "\t\tfinish {\n\t\t\tphong 1\n\t\t\treflection {\n\t\t\t\t0.40\n\t\t\t\tmetallic\n\t\t\t}\n"
+						+ "\t\t}\n\t}\n\n#declare H_Texture =\n\ttexture {\n\t\tpigment {\n\t\t\tcolor rgb <1, 1, 1> * 0.0"
+						+ "\n\t\t}\n\t}\n\n#declare Min_Texture =\n\ttexture {\n\t\tH_Texture\n\t}\n\n"
+						+ "#declare Face_Texture =\n\ttexture {\n\t\tpigment {\n\t\t\tcolor rgb <1, 1, 1> * 1.10\n\t\t}\n"
+						+ "\t}\n\n#declare Hands_Texture =\n\ttexture {\n\t\tpigment {\n\t\t\tcolor rgb <1, 1, 1> * 0.0\n"
+						+ "\t\t}\n\t}\n\n//------------------------------------------------------------------------\n"
+						+ "// clock-size ------------------------------------------------------------\n#declare CR = 30;\n\n"
+						+ "//------------------------------------------------------------------------\n"
+						+ "// calculation of time ---------------------------------------------------\n"
+						+ "#local H = 0;\n#local Min = 0;\n#declare Initial_Clock = "
+						+ showOneDay(firstDate, "20120712000000")
+						+ ";\n#declare Final_Clock "
+						+ "= "
+						+ (showOneDay(firstDate, "20120712000000") + 2879)
+						+ ";\n#declare totalTime = Final_Clock - Initial_Clock;\n"
+						+ "#declare tempClock = clock - Initial_Clock;\n#declare Clock_Time = (tempClock / 720) + H "
+						+ " / (12) + Min / (720);\n\n// rotations of hands (clock) ----------------------------"
+						+ "----------------\n"
+						+ "#declare Rotate_H = Clock_Time * 360;\n#declare Rotate_Min = Clock_Time * 360 * 12;\n"
+						+ "\n//minutes-jump (clock) --------------------------------------------------\n"
+						+ "#declare Rotate_Min = int(Rotate_Min / 6 + 0.001) * 6;\n#declare Flat = <1, 1, 0.025>;\n"
+						+ "\n// border radii (clock) --------------------------------------------------\n"
+						+ "#declare Min_Ro = CR * 0.92;\n#declare Min_Ri = CR * 0.82;\n#declare H_Ri = CR * 0.65;\n"
+						+ "#declare Min_R = CR * 0.0200;\n#declare H_R = CR * 0.0400;\n#declare Face_D = 0.001;\n"
+						+ "\n// length of hands (clock) -----------------------------------------------\n"
+						+ "#declare Hand_H_Len = CR * 0.60;\n#declare Hand_Min_Len = CR * 0.85;\n"
+						+ "\n// radii of the hands (clock) --------------------------------------------\n"
+						+ "#declare Hand_H_D = CR * 0.055;\n#declare Hand_Min_D = CR * 0.035;\n\n"
+						+ "// position z of hands (clock) -------------------------------------------\n"
+						+ "#declare Hand_H_Z = CR * 0.05;\n#declare Hand_Min_Z = CR * 0.04;\n\n"
+						+ "//------------------------------------------------------------------------\n"
+						+ "// view ------------------------------------------------------------------\n"
+						+ "union {\n\t// hands -------------------------------------------------------------\n\t"
+						+ "// hours\n\tcylinder {\n\t\t<0, 0, 0>, <0, Hand_H_Len, 0>, Hand_H_D\n\t\tscale Flat\n\t\t"
+						+ "rotate <-10, 0, - Rotate_H>\n\t\ttranslate <-20, 80, 15 - Hand_H_Z>\n\t\ttexture {\n\t\t\t"
+						+ "Hands_Texture\n\t\t}\n\t}\n\n\t// minutes\n\tcylinder {\n\t\t"
+						+ "<0, 0, 0>, <0, Hand_Min_Len, 0>, Hand_Min_D\n\t\tscale Flat\n\t\trotate <-10, 0, - Rotate_Min>"
+						+ "\n\t\ttranslate <-20, 80, 15 - Hand_Min_Z>\n\t\ttexture {\n\t\t\tHands_Texture\n\t\t}\n\t}\n\n\t"
+						+ "// body --------------------------------------------------------------\n\t// center-point\n\t"
+						+ "cylinder {\n\t\t<0, 0, -Hand_H_Z>, <0, 0, 0>, Hand_H_D * 1.5\n\t\ttexture {\n\t\t\t"
+						+ "Hands_Texture\n\t\t}\n\t\ttranslate <-20, 80, 15>\n\t}\n\n\t"
+						+ "// clock-face\n\t#declare Nr = 0;\n\t#while (Nr < 60)\n\t\t"
+						+ "#if(Nr / 5 = int(Nr / 5)) // hours\n\t\t\tcylinder {\n\t\t\t\t<0, H_Ri, 0>, <0, Min_Ro, 0>, H_R"
+						+ "\n\t\t\t\tscale Flat\n\t\t\t\trotate <-10, 0, Nr * 360 / 60>\n\t\t\t\ttexture {\n\t\t\t\t\t"
+						+ "H_Texture\n\t\t\t\t}\n\t\t\t\ttranslate <-20, 80, 15>\n\t\t\t}\n\t\t#else // minutes\n\t\t\t"
+						+ "cylinder {\n\t\t\t\t<0, Min_Ri, 0>, <0, Min_Ro, 0>, Min_R\n\t\t\t\tscale Flat\n\t\t\t\t"
+						+ "rotate <-10, 0, Nr * 360 / 60>\n\t\t\t\ttexture {\n\t\t\t\t\tMin_Texture\n\t\t\t\t}\n\t\t\t\t"
+						+ "translate <-20, 80, 15>\n\t\t\t}\n\t\t#end\n\t\t#declare Nr = Nr + 1;\n\t#end\n}\n\n"
+						+ "//------------------------------------------------------------------------\n"
+						+ "// patient ---------------------------------------------------------------\n"
 						+ "#declare Patient =\nsphere {\n\t<1, 1, 1>, 2\n\ttexture {\n\t\tpigment {\n\t\t\t"
 						+ "color rgb <0, 1, 0>\n\t\t}\n\t\tfinish {\n\t\t\tambient 0.1\n\t\t\tdiffuse 0.85\n\t\t\t"
 						+ "phong 1\n\t\t}\n\t}\n}\n\n"
