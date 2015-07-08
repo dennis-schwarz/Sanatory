@@ -35,5 +35,5 @@ public class IniWriterImpl implements IniWriter {
 	public void close() {
 		outputWriter.close();
 	}
-	
+
 }

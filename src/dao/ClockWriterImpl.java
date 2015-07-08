@@ -9,23 +9,22 @@ public class ClockWriterImpl implements ClockWriter {
 	PrintWriter outputWriter;
 	@SuppressWarnings("unused")
 	private ApplicationContext applicationContext;
-	private static ClockWriterImpl uniqueInstance = null;
+	private static POVWriterImpl uniqueInstance = null;
 
 	public ClockWriterImpl(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 		try {
 			this.outputWriter = new PrintWriter(
-					applicationContext.getOutputFile());
+					applicationContext.getClockFile());
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
 
 	// make sure only one instance of DAOTextfile can get initiated
-	public ClockWriterImpl getUniqueInstance(
-			ApplicationContext applicationContext) {
+	public POVWriterImpl getUniqueInstance(ApplicationContext applicationContext) {
 		if (uniqueInstance == null) {
-			uniqueInstance = new ClockWriterImpl(applicationContext);
+			uniqueInstance = new POVWriterImpl(applicationContext);
 		}
 		return uniqueInstance;
 	}

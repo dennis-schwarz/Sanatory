@@ -7,7 +7,7 @@ public class ApplicationContext {
 	private String movementsFile = "data/movements.txt";
 	private String outputFile = "data/patients.inc";
 	private String iniFile = "data/patients.ini";
-	private String clockFile = "data/clock.ini";
+	private String clockFile = "data/clock.inc";
 
 	public ApplicationContext() {
 
