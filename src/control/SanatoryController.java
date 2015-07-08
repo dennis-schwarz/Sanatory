@@ -88,7 +88,7 @@ public class SanatoryController {
 						+ "phong 1\n\t\t}\n\t}\n}\n\n"
 						+ "//------------------------------------------------------------------------\n"
 						+ "// movements -------------------------------------------------------------"
-						+ "\n#declare patients =\nunion {\n\n");
+						+ "\n#declare patients =\nunion {");
 
 		// movements
 		for (int i = 0; i < movements.size(); i++) {
@@ -209,12 +209,12 @@ public class SanatoryController {
 			}
 		}
 		// close union with "}" and close writer
-		povWriter.writeOutput("}");
+		povWriter.writeOutput("\n}");
 		povWriter.close();
 
 		// write "patients.ini"-file for clock animation
 		iniWriter
-				.writeOutput(";Persistence Of Vision raytracer version 3.5 example file.\n"
+				.writeOutput(";persistence of vision raytracer version 3.5 example file.\n"
 						+ "Antialias = On\n"
 						+ "Antialias_Threshold = 0.30\n"
 						+ "Antialias_Depth = 3\n"

@@ -3,9 +3,9 @@
 #declare usb_material =
 material {
 	texture {
-		//pigment {color <0, 0, 1> transmit 0.5}
     		pigment {
 			color <0, 0, 1>
+			// transmit 0.5
 		}
     		finish {
       			ambient 0.0

@@ -1,8 +1,4 @@
 //------------------------------------------------------------------------
-// POV-Ray 3.7 Scene File "patients.pov"
-// created by Miriam Scholer, Dennis Schwarz and Manuel Huerbin, FHNW, 2015
-
-//------------------------------------------------------------------------
 // general settings ------------------------------------------------------
 #version 3.7;
 global_settings {
