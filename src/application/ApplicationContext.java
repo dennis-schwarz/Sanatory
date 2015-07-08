@@ -8,6 +8,11 @@ public class ApplicationContext {
 	private String outputFile = "data/patients.inc";
 	private String iniFile = "data/patients.ini";
 	private String clockFile = "data/clock.inc";
+	private String outputDate = "20120712000000";
+
+	public String getOutputDate() {
+		return outputDate;
+	}
 
 	public ApplicationContext() {
 

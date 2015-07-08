@@ -21,6 +21,7 @@ import model.Department;
 import model.Movement;
 
 public class SanatoryController {
+	private ApplicationContext applicationContext;
 	private DAO sanatoryDao;
 	private POVWriter povWriter;
 	private IniWriter iniWriter;
@@ -40,6 +41,7 @@ public class SanatoryController {
 	int spline = 1;
 
 	public SanatoryController(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
 		this.sanatoryDao = new DAOTextfile(applicationContext);
 		this.povWriter = new POVWriterImpl(applicationContext);
 		this.iniWriter = new IniWriterImpl(applicationContext);
@@ -78,7 +80,7 @@ public class SanatoryController {
 				.toMinutes((long) difference);
 
 		// choose one day to display:
-		long chosedDate = showOneDay(firstDate, "20120712000000");
+		long chosedDate = showOneDay(firstDate, applicationContext.getOutputDate());
 
 		povWriter
 				.writeOutput("//------------------------------------------------------------------------\n"
