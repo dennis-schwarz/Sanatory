@@ -20,12 +20,12 @@ public class DAOTextfile implements DAO {
 	ArrayList<Movement> movements = new ArrayList<Movement>();
 	int spline = 1;
 	private ApplicationContext applicationContext;
-	
-	public DAOTextfile(ApplicationContext applicationContext){
+
+	public DAOTextfile(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
-	
-	// Make sure only one Instance of DAOTextfile can get initiated
+
+	// make sure only one instance of DAOTextfile can get initiated
 	public DAOTextfile getUniqueInstance(ApplicationContext applicationContext) {
 		if (uniqueInstance == null) {
 			uniqueInstance = new DAOTextfile(applicationContext);
@@ -34,17 +34,19 @@ public class DAOTextfile implements DAO {
 	}
 
 	@SuppressWarnings("finally")
-	public ArrayList<Department> getAllDepartments(){
+	public ArrayList<Department> getAllDepartments() {
 		BufferedReader br = null;
 		String line = "";
 		String cvsSplitBy = "\t";
 
 		try {
-			// Read Departments from csv-File
-			br = new BufferedReader(new FileReader(applicationContext.getDepartmentsFile()));
+			// read departments from csv-File
+			br = new BufferedReader(new FileReader(
+					applicationContext.getDepartmentsFile()));
 			line = br.readLine(); // skip first line (title)
 
-			// Read csv-File line by line and create department object with properties
+			// read csv-File line by line and create department object with
+			// properties
 			while ((line = br.readLine()) != null) {
 				String[] details = line.split(cvsSplitBy);
 				Department department = new Department(
@@ -61,8 +63,8 @@ public class DAOTextfile implements DAO {
 
 		} catch (IOException e) {
 			e.printStackTrace();
-		
-		// Close Buffered Reader after import
+
+			// close buffered reader after import
 		} finally {
 			if (br != null) {
 
@@ -75,9 +77,9 @@ public class DAOTextfile implements DAO {
 			return departments;
 		}
 	}
-	
+
 	@SuppressWarnings("finally")
-	public ArrayList<Movement> getAllMovements(){
+	public ArrayList<Movement> getAllMovements() {
 		BufferedReader br = null;
 		String line = "";
 		String cvsSplitBy = "\t";
@@ -85,9 +87,10 @@ public class DAOTextfile implements DAO {
 		Department to = null;
 		Date entry = null;
 		int type = 0;
-		
+
 		try {
-			br = new BufferedReader(new FileReader(applicationContext.getMovementsFile()));
+			br = new BufferedReader(new FileReader(
+					applicationContext.getMovementsFile()));
 			line = br.readLine(); // skip first line (title)
 
 			while ((line = br.readLine()) != null) {
@@ -125,7 +128,7 @@ public class DAOTextfile implements DAO {
 			return movements;
 		}
 	}
-	
+
 	// check if department exists
 	public Department checkDepartment(String details) {
 		int ID = 0;
@@ -133,14 +136,17 @@ public class DAOTextfile implements DAO {
 		boolean departmentExists = false;
 
 		try {
-			ID = Integer.parseInt(details); // department is not _ENTRY_ or _EXIT_
+			ID = Integer.parseInt(details); // department is not _ENTRY_ or
+											// _EXIT_
 		} catch (NumberFormatException e) {
 			ID = 0;
 		}
 
 		if (ID != 0) {
 			for (int i = 0; i < departments.size(); i++) {
-				if (departments.get(i).getID() == ID) { // checks if department exists in "departments.txt"
+				if (departments.get(i).getID() == ID) { // checks if department
+														// exists in
+														// "departments.txt"
 					department = departments.get(i);
 					departmentExists = true;
 				}

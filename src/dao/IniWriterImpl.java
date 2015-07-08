@@ -10,18 +10,17 @@ public class IniWriterImpl implements IniWriter {
 	@SuppressWarnings("unused")
 	private ApplicationContext applicationContext;
 	private static POVWriterImpl uniqueInstance = null;
-	
-	public IniWriterImpl(ApplicationContext applicationContext){
+
+	public IniWriterImpl(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 		try {
 			this.outputWriter = new PrintWriter(applicationContext.getIniFile());
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-	// Make sure only one Instance of DAOTextfile can get initiated
+
+	// make sure only one instance of DAOTextfile can get initiated
 	public POVWriterImpl getUniqueInstance(ApplicationContext applicationContext) {
 		if (uniqueInstance == null) {
 			uniqueInstance = new POVWriterImpl(applicationContext);
@@ -36,4 +35,5 @@ public class IniWriterImpl implements IniWriter {
 	public void close() {
 		outputWriter.close();
 	}
+	
 }

@@ -8,6 +8,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import dao.ClockWriter;
+import dao.ClockWriterImpl;
 import dao.DAO;
 import dao.DAOTextfile;
 import dao.IniWriter;
@@ -22,6 +24,7 @@ public class SanatoryController {
 	private DAO sanatoryDao;
 	private POVWriter povWriter;
 	private IniWriter iniWriter;
+	private ClockWriter clockWriter;
 	private ArrayList<Department> departments;
 	private ArrayList<Movement> movements;
 	@SuppressWarnings("rawtypes")
@@ -40,6 +43,7 @@ public class SanatoryController {
 		this.sanatoryDao = new DAOTextfile(applicationContext);
 		this.povWriter = new POVWriterImpl(applicationContext);
 		this.iniWriter = new IniWriterImpl(applicationContext);
+		this.clockWriter = new ClockWriterImpl(applicationContext);
 		this.departments = sanatoryDao.getAllDepartments();
 		this.movements = sanatoryDao.getAllMovements();
 	}
@@ -73,34 +77,11 @@ public class SanatoryController {
 		double differenceInMinutes = TimeUnit.MILLISECONDS
 				.toMinutes((long) difference);
 
+		// choose one day to display:
+		long chosedDate = showOneDay(firstDate, "20120712000000");
+
 		povWriter
 				.writeOutput("//------------------------------------------------------------------------\n"
-						+ "// POV-Ray 3.7 Scene File \"patients.pov\"\n// created by Miriam Scholer, Dennis Schwarz and"
-						+ " Manuel Huerbin, FHNW, 2015\n\n"
-						+ "//------------------------------------------------------------------------\n"
-						+ "// general settings ------------------------------------------------------\n"
-						+ "#version 3.7;\nglobal_settings {\n\tassumed_gamma 1.0\n}\n\n"
-						+ "#include \"colors.inc\"\n#include \"textures.inc\"\n#include \"functions.inc\""
-						+ "\n#include \"math.inc\"\n#include "
-						+ "\"transforms.inc\"\n#include \"usb.pov\" //usb-model (transparent)\n"
-						+ "\n//------------------------------------------------------------------------\n"
-						+ "// camera ----------------------------------------------------------------\n"
-						+ "#declare Camera =\ncamera {\n\tperspective\n\tup <0, 1, 0>\n\tright -x * image_width / image_height"
-						+ "\n\tlocation <0, 0, 1092.539>\n\tlook_at <0, 0, 1091.539>\n\tangle 22.34049 //horizontal FOV angle"
-						+ "\n\trotate <0, 0, -33.51162> //roll\n\trotate <44.54607, 0, 0> //pitch"
-						+ "\n\trotate <0, -44.05138, 0> //yaw\n\ttranslate <201.5, 233.35, 32.205>\n}\n"
-						+ "camera {\n\tCamera\n}\n\n"
-						+ "//------------------------------------------------------------------------\n"
-						+ "// background ------------------------------------------------------------\n"
-						+ "background {\n\tcolor srgb <1, 1, 1>\n}\n\n"
-						+ "//------------------------------------------------------------------------\n"
-						+ "// sun -------------------------------------------------------------------\n"
-						+ "light_source {\n\t<-1000, 2500, -2500>\n\tcolor <1, 1, 1>\n}\n\n"
-						+ "//------------------------------------------------------------------------\n"
-						+ "// sky -------------------------------------------------------------------\n"
-						+ "sky_sphere {\n\tpigment {\n\t\tgradient <0, 0, 0>\n\t\tcolor_map {\n\t\t\t"
-						+ "[0 color rgb <1, 1, 1>]\n\t\t\t[1 color rgb <1, 2, 3>]\n\t\t}\n\t\tscale 2\n\t}\n}\n\n"
-						+ "//------------------------------------------------------------------------\n"
 						+ "// clock - textures ------------------------------------------------------\n"
 						+ "#declare Frame_Texture =\n\ttexture {\n\t\tpigment {\n\t\t\tcolor rgb <1.0, 1, 1> * 0.1\n\t\t}\n"
 						+ "\t\tfinish {\n\t\t\tphong 1\n\t\t\treflection {\n\t\t\t\t0.40\n\t\t\t\tmetallic\n\t\t\t}\n"
@@ -113,10 +94,10 @@ public class SanatoryController {
 						+ "//------------------------------------------------------------------------\n"
 						+ "// calculation of time ---------------------------------------------------\n"
 						+ "#local H = 0;\n#local Min = 0;\n#declare Initial_Clock = "
-						+ showOneDay(firstDate, "20120712000000")
+						+ chosedDate
 						+ ";\n#declare Final_Clock "
 						+ "= "
-						+ (showOneDay(firstDate, "20120712000000") + 2879)
+						+ (chosedDate + 2879)
 						+ ";\n#declare totalTime = Final_Clock - Initial_Clock;\n"
 						+ "#declare tempClock = clock - Initial_Clock;\n#declare Clock_Time = (tempClock / 720) + H "
 						+ " / (12) + Min / (720);\n\n// rotations of hands (clock) ----------------------------"
@@ -157,7 +138,8 @@ public class SanatoryController {
 						+ "color rgb <0, 1, 0>\n\t\t}\n\t\tfinish {\n\t\t\tambient 0.1\n\t\t\tdiffuse 0.85\n\t\t\t"
 						+ "phong 1\n\t\t}\n\t}\n}\n\n"
 						+ "//------------------------------------------------------------------------\n"
-						+ "// movements -------------------------------------------------------------");
+						+ "// movements -------------------------------------------------------------"
+						+ "\n#declare patients =\nunion {\n\n");
 
 		// movements
 		for (int i = 0; i < movements.size(); i++) {
@@ -165,12 +147,10 @@ public class SanatoryController {
 			lastDiffInMinutes = diffInMinutes;
 
 			Date currentDate = movements.get(i).whenDoIStart();
-			long diff = currentDate.getTime() - firstDate.getTime(); // time to
-																		// "arrive"
-																		// (_ENTRY_)
-			diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diff); // arriving-time
-																	// in
-																	// minutes
+			// time to "arrive" (_ENTRY_)
+			long diff = currentDate.getTime() - firstDate.getTime();
+			// arriving-time in minutes
+			diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(diff);
 
 			// _ENTRY_
 			if (movements.get(i).whereAmI() != null
@@ -196,11 +176,8 @@ public class SanatoryController {
 				// patient-movements
 				if (movements.get(i).whereAmI() != null
 						&& movements.get(i).whereDoIGo() != null
-						&& movements.get(i).whereDoIGo().getID() != 0) { // patient
-																			// is
-																			// not
-																			// leaving
-																			// hospital
+						// patient is not leaving hospital
+						&& movements.get(i).whereDoIGo().getID() != 0) {
 
 					// calculate optional leaving time
 					double leavingTime = calculateLeavingTime(diffInMinutes,
@@ -212,18 +189,17 @@ public class SanatoryController {
 							movements.get(i).whereDoIGo().getzCoordinate(),
 							lastDiffInMinutes);
 
-					// leaving time is only written down after the patients
-					// arrived at a station
-					if (movements.get(i).whereAmI().getID() != 0) { // when it
-																	// is not
-																	// the
-																	// patient's
-																	// entry
-
-						// time when patient has to leave the current station
-						// (method: calculateLeavingTime(...))
-						// diffInMinutes is the time, when the patient has to
-						// arrive at a station
+					/*
+					 * leaving time is only written down after the patients
+					 * arrived at a station
+					 */
+					// when it is not the patient's entry
+					if (movements.get(i).whereAmI().getID() != 0) {
+						/*
+						 * time when patient has to leave the current station
+						 * (method: calculateLeavingTime(...)) diffInMinutes is
+						 * the time, when the patient has to arrive at a station
+						 */
 						povWriter.writeOutput("\t" + leavingTime + ", <"
 								+ movements.get(i).whereAmI().getxCoordinate()
 								+ ", "
@@ -233,8 +209,10 @@ public class SanatoryController {
 								+ ">,\n");
 					}
 
-					// if arrivingTime is equal to leavingTime increase
-					// arrivingTime 1 minute
+					/*
+					 * if arrivingTime is equal to leavingTime increase
+					 * arrivingTime 1 minute
+					 */
 					if (leavingTime == diffInMinutes) {
 						diffInMinutes = diffInMinutes + 1;
 					}
@@ -255,8 +233,10 @@ public class SanatoryController {
 
 					patientMoves = true;
 
-					// patient-movement if patient only moves to departments
-					// that does not exist
+					/*
+					 * patient-movement if patient only moves to departments
+					 * that does not exist
+					 */
 				} else if (patientMoves == false) {
 					povWriter.writeOutput("\t\t-1, <92, 183, 16.25>,\n");
 				}
@@ -279,9 +259,11 @@ public class SanatoryController {
 				}
 			}
 		}
-
+		// close union with "}" and close writer
+		povWriter.writeOutput("}");
 		povWriter.close();
 
+		// write "patients.ini"-file for clock animation
 		iniWriter
 				.writeOutput(";Persistence Of Vision raytracer version 3.5 example file.\n"
 						+ "Antialias = On\n"
@@ -291,20 +273,21 @@ public class SanatoryController {
 						+ "Initial_Frame = 1\n"
 						+ "Final_Frame = 1000\n"
 						+ "Initial_Clock = "
-						+ showOneDay(firstDate, "20120712000000") // show
-																	// 12.07.2012
-																	// -
-																	// 00:00:00
+						// show chosedDate
+						+ chosedDate
 						+ "\n"
 						+ "Final_Clock = "
-						+ (showOneDay(firstDate, "20120712000000") + 2879) // until
-																			// 13.07.2012
-																			// -
-																			// 23:59:59
+						// until? (2 days)
+						+ (chosedDate + 2879)
 						+ "\n"
-						+ "Cyclic_Animation = on\n"
-						+ "Pause_when_Done = off");
+						+ "Cyclic_Animation = on\n" + "Pause_when_Done = off");
+
 		iniWriter.close();
+
+		// write "clock.ini"-file for showing the clock
+		clockWriter.writeOutput(" test ");
+		clockWriter.close();
+
 		depMov.add(departments);
 		depMov.add(movements);
 	}
@@ -374,17 +357,16 @@ public class SanatoryController {
 		totalDistance = xDistance + yDistance + zDistance;
 		totalDistance = Math.sqrt(totalDistance);
 
-		// System.out.print(totalDistance + "\t");
-
-		// temp
-		// double diffInMinutesTemp = diffInMinutes;
-
-		// for each step in the coordinate system the patient needs to leave
-		// 0.005 minutes earlier
+		/*
+		 * for each step in the coordinate system the patient needs to leave 0.5
+		 * minutes earlier
+		 */
 		diffInMinutes = diffInMinutes - (totalDistance * 0.5);
 
-		// catch all cases, that would leave the station before they arrive at
-		// this station (increases speed (92 cases))
+		/*
+		 * catch all cases, that would leave the station before they arrive at
+		 * this station (increases speed (92 cases))
+		 */
 		if (diffInMinutes < lastDiffInMinutes) {
 			diffInMinutes = lastDiffInMinutes;
 		}
@@ -394,25 +376,21 @@ public class SanatoryController {
 
 	// show one day
 	public long showOneDay(Date firstDate, String definedDate) {
-
 		Date tempDate = null;
 		try {
 			DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-			tempDate = df.parse(definedDate); // which day should be shown (i.e.
-												// "20120320000000")
+			// which day should be shown (i.e. "20120320000000")
+			tempDate = df.parse(definedDate);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 
-		long diffDefined = tempDate.getTime() - firstDate.getTime(); // start
-																		// time
-																		// of
-																		// the
-																		// selected
-																		// day
+		// start time of the selected day
+		long diffDefined = tempDate.getTime() - firstDate.getTime();
 		long diffInMinutesDefined = TimeUnit.MILLISECONDS
 				.toMinutes(diffDefined); // this start time in minutes
 
 		return diffInMinutesDefined;
 	}
+
 }
