@@ -45,8 +45,10 @@ public class DAOTextfile implements DAO {
 					applicationContext.getDepartmentsFile()));
 			line = br.readLine(); // skip first line (title)
 
-			// read csv-File line by line and create department object with
-			// properties
+			/*
+			 * read csv-File line by line and create department object with
+			 * properties
+			 */
 			while ((line = br.readLine()) != null) {
 				String[] details = line.split(cvsSplitBy);
 				Department department = new Department(
@@ -136,17 +138,14 @@ public class DAOTextfile implements DAO {
 		boolean departmentExists = false;
 
 		try {
-			ID = Integer.parseInt(details); // department is not _ENTRY_ or
-											// _EXIT_
+			ID = Integer.parseInt(details); // is not _ENTRY_ or _EXIT_
 		} catch (NumberFormatException e) {
 			ID = 0;
 		}
 
 		if (ID != 0) {
 			for (int i = 0; i < departments.size(); i++) {
-				if (departments.get(i).getID() == ID) { // checks if department
-														// exists in
-														// "departments.txt"
+				if (departments.get(i).getID() == ID) { // department exists
 					department = departments.get(i);
 					departmentExists = true;
 				}

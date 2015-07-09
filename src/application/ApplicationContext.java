@@ -8,11 +8,7 @@ public class ApplicationContext {
 	private String outputFile = "data/patients.inc";
 	private String iniFile = "data/patients.ini";
 	private String clockFile = "data/clock.inc";
-	private String outputDate = "20120712000000";
-
-	public String getOutputDate() {
-		return outputDate;
-	}
+	private String outputDate = "20120712000000"; // July 7 2012 - 00:00:00
 
 	public ApplicationContext() {
 
@@ -36,6 +32,10 @@ public class ApplicationContext {
 
 	public String getClockFile() {
 		return clockFile;
+	}
+
+	public String getOutputDate() {
+		return outputDate;
 	}
 
 }

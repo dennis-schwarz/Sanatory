@@ -80,7 +80,8 @@ public class SanatoryController {
 				.toMinutes((long) difference);
 
 		// choose one day to display:
-		long chosedDate = showOneDay(firstDate, applicationContext.getOutputDate());
+		long chosedDate = showOneDay(firstDate,
+				applicationContext.getOutputDate());
 
 		povWriter
 				.writeOutput("//------------------------------------------------------------------------\n"

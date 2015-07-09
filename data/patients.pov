@@ -4,7 +4,7 @@
 global_settings {
 	assumed_gamma 1.0
 }
-//#include "usb_geom.inc" // usb model
+#include "usb_geom.inc" // usb model
 #include "patients.inc" // patients
 #include "clock.inc" // clock
 
@@ -60,9 +60,9 @@ object {
 // assemble and position buildings and patients -------------------------
 object {
 	union {
-      		//object {
-				//usb
-			//}
+      		object {
+				usb
+			}
       		object {
 				patients
 			}
