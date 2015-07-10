@@ -60,9 +60,9 @@ object {
 // assemble and position buildings and patients -------------------------
 object {
 	union {
-      		object {
-				usb
-			}
+      		//object {
+				//usb
+			//}
       		object {
 				patients
 			}

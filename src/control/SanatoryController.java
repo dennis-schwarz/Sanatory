@@ -34,6 +34,7 @@ public class SanatoryController {
 	Date lastDate = null;
 	boolean patientEntry = false; // patient has entry
 	double firstEntry = 0; // entry-time of a patient
+	boolean patientEntryEmergency = false; // patient entry at emergency
 	boolean patientIsInHospital = false; // patient is currently in the hospital
 	boolean patientMoves = false; // patient moves to departments that exist
 	double diffInMinutes = 0;
@@ -83,6 +84,10 @@ public class SanatoryController {
 		long chosedDate = showOneDay(firstDate,
 				applicationContext.getOutputDate());
 
+		// choose how many days should be displayed
+		long howManyDays = howManyDays(chosedDate,
+				applicationContext.getHowManyDays());
+
 		povWriter
 				.writeOutput("//------------------------------------------------------------------------\n"
 						+ "// patient ---------------------------------------------------------------\n"
@@ -123,6 +128,22 @@ public class SanatoryController {
 									+ spline
 									+ " =\nspline {\n\tlinear_spline\n");
 					patientEntry = false;
+				}
+
+				/*
+				 * define start point when patient entries at emergency (random
+				 * x-Coordinate between 0 and 150)
+				 * 
+				 * time is estimated to 40 minutes
+				 */
+				if (movements.get(i).whereAmI() != null
+						&& movements.get(i).whereAmI().getID() == 0
+						&& movements.get(i).whereDoIGo() != null
+						&& movements.get(i).whereDoIGo().getID() == 480000) {
+					povWriter.writeOutput("\t" + (diffInMinutes - 40) + ", <"
+							+ ((int) (Math.random() * ((150 - 1) + 1)) + 1)
+							+ ", 0.0, 16.25>,\n");
+					patientEntryEmergency = true;
 				}
 
 				// patient-movements
@@ -182,7 +203,6 @@ public class SanatoryController {
 									+ ", "
 									+ movements.get(i).whereDoIGo()
 											.getzCoordinate() + ">,\n");
-
 					patientMoves = true;
 
 					/*
@@ -193,21 +213,41 @@ public class SanatoryController {
 					povWriter.writeOutput("\t\t-1, <92, 183, 16.25>,\n");
 				}
 
-				// _EXIT_
+				// _EXIT_ (different time when patient entry at emergency)
 				if (movements.get(i).whereDoIGo() != null
 						&& movements.get(i).whereDoIGo().getID() == 0) {
-					povWriter
-							.writeOutput("}\n// generate patient ------------------------------------------------------\n"
-									+ "#if (clock >= "
-									+ firstEntry
-									+ " & clock < "
-									+ diffInMinutes
-									+ ")\n\t"
-									+ "object {\n\t\tPatient\n\t\ttranslate Spline"
-									+ spline + "(clock)\n\t}\n#end");
-					patientIsInHospital = false;
-					patientMoves = false;
-					spline++;
+
+					if (patientEntryEmergency) {
+						povWriter
+								.writeOutput("}\n// generate patient ------------------------------------------------------\n"
+										+ "#if (clock >= "
+										+ (firstEntry - 40) // entry on
+															// emergency
+										+ " & clock < "
+										+ diffInMinutes
+										+ ")\n\t"
+										+ "object {\n\t\tPatient\n\t\ttranslate Spline"
+										+ spline + "(clock)\n\t}\n#end");
+						patientEntryEmergency = false;
+						patientIsInHospital = false;
+						patientMoves = false;
+						spline++;
+
+					} else {
+						povWriter
+								.writeOutput("}\n// generate patient -------------------------------"
+										+ "-----------------------\n"
+										+ "#if (clock >= "
+										+ firstEntry
+										+ " & clock < "
+										+ diffInMinutes
+										+ ")\n\t"
+										+ "object {\n\t\tPatient\n\t\ttranslate Spline"
+										+ spline + "(clock)\n\t}\n#end");
+						patientIsInHospital = false;
+						patientMoves = false;
+						spline++;
+					}
 				}
 			}
 		}
@@ -229,10 +269,11 @@ public class SanatoryController {
 						+ chosedDate
 						+ "\n"
 						+ "Final_Clock = "
-						// until? (2 days)
-						+ (chosedDate + 2879)
+						// until? (x days)
+						+ howManyDays
 						+ "\n"
-						+ "Cyclic_Animation = on\n" + "Pause_when_Done = off");
+						+ "Cyclic_Animation = on\n"
+						+ "Pause_when_Done = off");
 
 		iniWriter.close();
 
@@ -254,7 +295,7 @@ public class SanatoryController {
 						+ chosedDate
 						+ ";\n#declare Final_Clock "
 						+ "= "
-						+ (chosedDate + 2879)
+						+ howManyDays
 						+ ";\n#declare totalTime = Final_Clock - Initial_Clock;\n"
 						+ "#declare tempClock = clock - Initial_Clock;\n#declare Clock_Time = (tempClock / 720) + H "
 						+ " / (12) + Min / (720);\n\n// rotations of hands (clock) ----------------------------"
@@ -388,7 +429,6 @@ public class SanatoryController {
 		Date tempDate = null;
 		try {
 			DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-			// which day should be shown (i.e. "20120320000000")
 			tempDate = df.parse(definedDate);
 		} catch (ParseException e) {
 			e.printStackTrace();
@@ -400,6 +440,18 @@ public class SanatoryController {
 				.toMinutes(diffDefined); // this start time in minutes
 
 		return diffInMinutesDefined;
+	}
+
+	// how many days
+	public long howManyDays(long chosedDate, int howMany) {
+		long howManyDays = 0;
+		long minutes = (howMany * 1440) - 1;
+
+		if (howMany > 0) {
+			howManyDays = chosedDate + minutes;
+		}
+
+		return howManyDays;
 	}
 
 }
