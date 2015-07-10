@@ -219,7 +219,8 @@ public class SanatoryController {
 
 					if (patientEntryEmergency) {
 						povWriter
-								.writeOutput("}\n// generate patient ------------------------------------------------------\n"
+								.writeOutput("}\n// generate patient -----------------------------"
+										+ "-------------------------\n"
 										+ "#if (clock >= "
 										+ (firstEntry - 40) // entry on
 															// emergency
