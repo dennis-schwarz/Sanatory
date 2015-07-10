@@ -134,13 +134,13 @@ public class SanatoryController {
 				 * define start point when patient entries at emergency (random
 				 * x-Coordinate between 0 and 150)
 				 * 
-				 * time is estimated to 40 minutes
+				 * time is estimated to 90 minutes
 				 */
 				if (movements.get(i).whereAmI() != null
 						&& movements.get(i).whereAmI().getID() == 0
 						&& movements.get(i).whereDoIGo() != null
 						&& movements.get(i).whereDoIGo().getID() == 480000) {
-					povWriter.writeOutput("\t" + (diffInMinutes - 40) + ", <"
+					povWriter.writeOutput("\t" + (diffInMinutes - 90) + ", <"
 							+ ((int) (Math.random() * ((150 - 1) + 1)) + 1)
 							+ ", 0.0, 16.25>,\n");
 					patientEntryEmergency = true;
@@ -222,8 +222,7 @@ public class SanatoryController {
 								.writeOutput("}\n// generate patient -----------------------------"
 										+ "-------------------------\n"
 										+ "#if (clock >= "
-										+ (firstEntry - 40) // entry on
-															// emergency
+										+ (firstEntry - 90) // emergency-entry
 										+ " & clock < "
 										+ diffInMinutes
 										+ ")\n\t"
