@@ -227,7 +227,7 @@ public class SanatoryController {
 										+ diffInMinutes
 										+ ")\n\t"
 										+ "object {\n\t\tPatient\n\t\ttranslate Spline"
-										+ spline + "(clock)\n\t}\n#end");
+										+ spline + "(clock)\n\t\tno_shadow\n\t}\n#end");
 						patientEntryEmergency = false;
 						patientIsInHospital = false;
 						patientMoves = false;
@@ -243,7 +243,7 @@ public class SanatoryController {
 										+ diffInMinutes
 										+ ")\n\t"
 										+ "object {\n\t\tPatient\n\t\ttranslate Spline"
-										+ spline + "(clock)\n\t}\n#end");
+										+ spline + "(clock)\n\t\tno_shadow\n\t}\n#end");
 						patientIsInHospital = false;
 						patientMoves = false;
 						spline++;
@@ -261,7 +261,7 @@ public class SanatoryController {
 						+ "Antialias = On\n"
 						+ "Antialias_Threshold = 0.30\n"
 						+ "Antialias_Depth = 3\n"
-						+ "Input_File_Name = patients.pov\n"
+						+ "Input_File_Name = scene.pov\n"
 						+ "Initial_Frame = 1\n"
 						+ "Final_Frame = 1000\n"
 						+ "Initial_Clock = "
