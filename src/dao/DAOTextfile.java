@@ -14,6 +14,7 @@ import model.Department;
 import model.Movement;
 
 public class DAOTextfile implements DAO {
+	
 	// declaration and initialization
 	private static DAOTextfile uniqueInstance = null;
 	ArrayList<Department> departments = new ArrayList<Department>();
@@ -159,4 +160,5 @@ public class DAOTextfile implements DAO {
 
 		return department;
 	}
+	
 }

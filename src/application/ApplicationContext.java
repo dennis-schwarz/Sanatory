@@ -8,9 +8,8 @@ public class ApplicationContext {
 	private String outputFile = "data/patients.inc";
 	private String iniFile = "data/patients.ini";
 	private String clockFile = "data/clock.inc";
-	// which day should be shown (i.e. "20120320000000")
-	private String outputDate = "20120712000000"; // start date - 00:00:00
-	private int howManyDays = 2; // x days will be shown (until 23:59:59)
+	private String outputDate = "20120712000000"; // start date: 12.07.2012 - 00:00:00
+	private int howManyDays = 2; // 2 days will be shown (until 23:59:59)
 
 	public ApplicationContext() {
 

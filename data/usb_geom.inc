@@ -4,8 +4,8 @@
 material {
 	texture {
     		pigment {
-			color <1, 1, 1.7>
-			transmit 0.8
+			color <1, 1, 1>
+			transmit 0.6
 		}
     		finish {
       			ambient 0.0

@@ -15,11 +15,12 @@
 #declare sun_z = 0;
 
 // let the sunshine in
-#if(sinus_y >= 0) // sun light sources is only activated if above horizon (y >= 0)
-	light_source {
-		<sun_x, sun_y, sun_z>
-  		color rgb 1
-  		parallel
-  		point_at <0, 0, 0>
-	}
-#end
+//#declare sun =
+	#if(sinus_y >= 0) // sun light sources is only activated if above horizon (y >= 0)
+		light_source {
+			<sun_x, sun_y, sun_z>
+  			color rgb 1
+  			parallel
+  			point_at <0, 0, 0>
+		}
+	#end

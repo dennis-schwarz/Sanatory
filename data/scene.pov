@@ -11,6 +11,8 @@ global_settings {
 #include "sun.inc" // sun
 #include "ambient" // ambient
 
+#declare rendered_Interval = Final_Clock - Initial_Clock;
+
 //------------------------------------------------------------------------
 // camera ----------------------------------------------------------------
 camera {
@@ -29,9 +31,17 @@ object {
       		object {
 				patients
 			}
+			
+			//object {
+				//sun
+			//}
+			
+			object {
+				ground
+			}
    	}
    	translate <-200, -200, 0> // translate to origin
    	scale <-1, 1, 1> // mirror x-axis
-   	rotate <0, 0, clock * 180> // rotate in the ground plane
+   	rotate <0, 0, clock * 180 / rendered_Interval> // rotate in the ground plane
    	rotate <-135, 0, 0> // tilt towards the camera
 }

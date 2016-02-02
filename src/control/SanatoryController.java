@@ -70,11 +70,11 @@ public class SanatoryController {
 		lastCal.set(Calendar.MINUTE, 59);
 		lastCal.set(Calendar.SECOND, 59);
 
-		// convert back to date-format (for calculation)
+		// convert back to date-format (calculation)
 		firstDate = firstCal.getTime();
 		lastDate = lastCal.getTime();
 
-		// calculates the difference in minutes
+		// calculate the difference in minutes
 		double difference = lastDate.getTime() - firstDate.getTime();
 		@SuppressWarnings("unused")
 		double differenceInMinutes = TimeUnit.MILLISECONDS
@@ -88,6 +88,7 @@ public class SanatoryController {
 		long howManyDays = howManyDays(chosedDate,
 				applicationContext.getHowManyDays());
 
+		// write in outputfile for POVRay
 		povWriter
 				.writeOutput("//------------------------------------------------------------------------\n"
 						+ "// patient ---------------------------------------------------------------\n"
@@ -342,7 +343,7 @@ public class SanatoryController {
 		depMov.add(movements);
 	}
 
-	// first Date
+	// first date
 	public Date searchFirstDate(ArrayList<Movement> movements) {
 		Date firstDate = null;
 		Movement movement;
@@ -362,7 +363,7 @@ public class SanatoryController {
 		return firstDate;
 	}
 
-	// last Date
+	// last date
 	public Date searchLastDate(ArrayList<Movement> movements) {
 		Date lastDate = null;
 		Movement movement;
@@ -382,7 +383,7 @@ public class SanatoryController {
 		return lastDate;
 	}
 
-	// calculate the time, when a patient has to leave its station
+	// calculate the time, when a patient has to leave his / her station
 	public double calculateLeavingTime(double diffInMinutes,
 			double currentXCoordinate, double currentYCoordinate,
 			double currentZCoordinate, double xDestination,
@@ -415,7 +416,7 @@ public class SanatoryController {
 
 		/*
 		 * catch all cases, that would leave the station before they arrive at
-		 * this station (increases speed (92 cases))
+		 * this station (increases speed)
 		 */
 		if (diffInMinutes < lastDiffInMinutes) {
 			diffInMinutes = lastDiffInMinutes;
